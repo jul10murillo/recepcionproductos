@@ -3,14 +3,19 @@
 /* @var $this yii\web\View */
 
 use yii\helpers\Html;
+use yii\widgets\ActiveForm;
 
 $this->title = 'About';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="site-about">
-    <h1><?= Html::encode($this->title) ?></h1>
+    <?php $form = ActiveForm::begin(['id' => 'csv-form']); ?>
 
-    <p>This is the About page. You may modify the following file to customize its content:</p>
+                <?= $form->field($model, 'file_csv')->fileInput() ?>
 
-    <code><?= __FILE__ ?></code>
+                <div class="form-group">
+                    <?= Html::submitButton('Submit', ['class' => 'btn btn-primary', 'name' => 'contact-button']) ?>
+                </div>
+
+    <?php ActiveForm::end(); ?>
 </div>
