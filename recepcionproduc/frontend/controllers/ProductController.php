@@ -4,6 +4,7 @@ namespace frontend\controllers;
 
 use app\models\Product;
 use yii\data\ActiveDataProvider;
+use yii\helpers\Url;
 
 
 class ProductController extends \yii\web\Controller
@@ -11,16 +12,20 @@ class ProductController extends \yii\web\Controller
     public function actionIndex() {
         $items = [
             [
-                'label' => 'Buscar Mapping' ,
-                'url'   => ['/mapping/index'] ,
+                'label' => 'Aishop' ,
+                'url'   => Url::to(['/mapping/index','M'=>1]) ,
             ] ,
             [
-                'label' => 'Subir Mapping' ,
-                'url'   => ['/mapping/upload'] ,
+                'label' => 'Exotik' ,
+                'url'   => Url::to(['/mapping/index','M'=>2]) ,
             ] ,
             [
-                'label' => 'Exportar Mapping' ,
-                'url'   => ['/mapping/export'] ,
+                'label' => 'Vesimenta',
+                'url'   => Url::to(['/mapping/index','M'=>3]) ,
+            ] ,
+            [
+                'label' => 'Xinfoni',
+                'url'   => Url::to(['/mapping/index','M'=>4]) ,
             ] ,
         ] ;
 
