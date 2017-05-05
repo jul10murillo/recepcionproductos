@@ -143,19 +143,19 @@ class SiteController extends Controller
      */
     public function actionAbout()
     {
-        $model = new CsvForm;
-        $importer = new CSVImporter;
-        
+        $model    = new CsvForm ;
+        $importer = new CSVImporter ;
+
         if (Yii::$app->request->isPost) {
             $importer->setData(new CSVReader([
-                        'filename' => $_FILES['CsvForm']['tmp_name']['file_csv'],
-                        'fgetcsvOptions' => [
-                            'delimiter' => '/',
-                            'enclosure'=>'*'
-                        ],
-                        'startFromLine'=>3
-                    ]));
-            
+                'filename'       => $_FILES['CsvForm']['tmp_name']['file_csv'] ,
+                'fgetcsvOptions' => [
+                    'delimiter' => '/' ,
+                    'enclosure' => '*'
+                ] ,
+                'startFromLine'  => 3
+            ])) ;
+
             $dataArray = $importer->getData();
 
             $numberRowsAffected = $importer->import(new MultipleImportStrategy([
@@ -167,6 +167,7 @@ class SiteController extends Controller
                             $value = explode(',', $line[0]);
                             return $value[17];
                         },
+                        'unique' => true,
                     ],
                     [
                         'attribute' => 'marca',
