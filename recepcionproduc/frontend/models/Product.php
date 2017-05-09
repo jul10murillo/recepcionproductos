@@ -43,6 +43,7 @@ use Yii;
  * @property string $codprov
  * @property string $descapsula
  * @property integer $id_mapping
+ * @property integer $acumulado
  *
  * @property Mapping $idMapping
  */
@@ -63,7 +64,7 @@ class Product extends \yii\db\ActiveRecord
     {
         return [
             [['cod_barra', 'marca', 'departamento', 'seccion', 'familia', 'temporada', 'ano', 'capsula', 'color', 'cantidad', 'pvptienda', 'peso', 'serie', 'referencia', 'descripcion', 'costodist', 'pvpmgta', 'gpeso', 'coddepto', 'codseccion', 'codfamilia', 'codsubfamilia', 'codano', 'codcapsula', 'codcolor', 'codtalla', 'codprov'], 'string'],
-            [['id_mapping'], 'integer'],
+            [['id_mapping', 'acumulado'], 'integer'],
             [['subfamilia', 'talla', 'proveedor', 'carac', 'codmarca', 'codtemporada', 'descapsula'], 'string', 'max' => 255],
             [['id_mapping'], 'exist', 'skipOnError' => true, 'targetClass' => Mapping::className(), 'targetAttribute' => ['id_mapping' => 'id']],
         ];
@@ -111,6 +112,7 @@ class Product extends \yii\db\ActiveRecord
             'codprov' => 'Codprov',
             'descapsula' => 'Descapsula',
             'id_mapping' => 'Id Mapping',
+            'acumulado' => 'Acumulado',
         ];
     }
 
@@ -120,14 +122,5 @@ class Product extends \yii\db\ActiveRecord
     public function getIdMapping()
     {
         return $this->hasOne(Mapping::className(), ['id' => 'id_mapping']);
-    }
-
-    /**
-     * @inheritdoc
-     * @return ProductQuery the active query used by this AR class.
-     */
-    public static function find()
-    {
-        return new ProductQuery(get_called_class());
     }
 }

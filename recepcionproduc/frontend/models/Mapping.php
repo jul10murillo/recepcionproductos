@@ -31,9 +31,8 @@ class Mapping extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['marca', 'fecha', 'tipo'], 'required'],
-            [['marca', 'tipo'], 'string'],
-            ['archivo', 'file', 'extensions' => ['csv']],
+            [['marca', 'fecha', 'tipo','archivo'], 'required'],
+            [['marca', 'tipo','archivo'], 'string'],
             [['fecha','archivo'], 'safe'],
         ];
     }

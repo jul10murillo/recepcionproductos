@@ -30,7 +30,7 @@ use kartik\file\FileInput;
         ]) ?>
         <?= $form->field($model, 'tipo')->dropDownList(['TEXTIL'=>'TEXTIL','SHOES'=>'SHOES','JEWELRY'=>'JEWELRY','ACCESSORIES'=>'ACCESSORIES']) ?>
         <?= $form->field($model, 'archivo')->fileInput() ?>
-    
+        
         <div class="form-group">
             <?= Html::submitButton('Enviar', ['class' => 'btn btn-primary']) ?>
         </div>

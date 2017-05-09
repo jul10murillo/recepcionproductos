@@ -50,6 +50,9 @@ return [
         'errorHandler' => [
             'errorAction' => 'site/error',
         ],
+        'gruduHelper' => [
+            'class' => 'app\components\gruduHelper',
+        ],
         /*
         'urlManager' => [
             'enablePrettyUrl' => true,

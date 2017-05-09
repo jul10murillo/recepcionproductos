@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use Yii;
 use app\models\Product;
 use yii\data\ActiveDataProvider;
 use yii\helpers\Url;
@@ -10,6 +11,7 @@ use yii\helpers\Url;
 class ProductController extends \yii\web\Controller
 {
     public function actionIndex() {
+
         $items = [
             [
                 'label' => 'Aishop' ,
@@ -30,7 +32,7 @@ class ProductController extends \yii\web\Controller
         ] ;
 
         return $this->render('index' , [
-                    'items' => $items
+                'items' => $items,
         ]) ;
     }
 

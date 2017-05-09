@@ -18,3 +18,7 @@ and open the template in the editor.
 .nav-pills > .active > a, .nav-pills > .active > a:hover {
     background-color: green;
 }
+.container-grid{
+    overflow-y: scroll;
+    height: 700px;
+}
