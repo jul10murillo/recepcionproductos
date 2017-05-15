@@ -1,0 +1,5 @@
+src/web/recepcionproduc/backend/runtime/*
+src/web/recepcionproduc/frontend/runtime/*
+recepcionproduc/frontend/web/assets/*
+recepcionproduc/frontend/runtime/*
+recepcionproduc/frontend/runtime/debug/*

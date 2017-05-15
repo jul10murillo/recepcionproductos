@@ -84,7 +84,7 @@ class Product extends \yii\db\ActiveRecord
             'familia' => 'Familia',
             'subfamilia' => 'Subfamilia',
             'temporada' => 'Temporada',
-            'ano' => 'Ano',
+            'ano' => 'Año',
             'capsula' => 'Capsula',
             'color' => 'Color',
             'talla' => 'Talla',
