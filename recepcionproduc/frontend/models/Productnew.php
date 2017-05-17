@@ -1,8 +1,8 @@
 <?php
 
-namespace app\models;
+namespace app\models ;
 
-use Yii;
+use Yii ;
 
 /**
  * This is the model class for table "product".
@@ -47,44 +47,60 @@ use Yii;
  *
  * @property Mapping $idMapping
  */
-class Productnew extends \yii\db\ActiveRecord
-{
+class Productnew extends \yii\base\Model {
+
+    public $cod_barra ;
+    public $marca ;
+    public $departamento ;
+    public $seccion ;
+    public $familia ;
+    public $subfamilia ;
+    public $temporada ;
+    public $ano ;
+    public $capsula ;
+    public $color ;
+    public $talla ;
+    public $proveedor ;
+    public $cantidad ;
+    public $referencia ;
+    public $descripcion ;
+    public $descapsula ;
+    public $carac ;
+    public $id_mapping ;
 
     /**
      * @inheritdoc
      */
-    public function rules()
-    {
+    public function rules() {
         return [
-            [['cod_barra','proveedor', 'marca', 'departamento', 'seccion', 'familia', 'temporada', 'ano', 'capsula', 'color', 'cantidad', 'referencia', 'descripcion'], 'string'],
-            [['cod_barra','cantidad','ano'],'integer'],
-            [['capsula','referencia','','familia','subfamilia', 'talla', 'proveedor', 'carac', 'descapsula'], 'string', 'max' => 255],
-        ];
+            [['cod_barra','marca','departamento','seccion','familia','subfamilia','temporada','ano','capsula','color','talla','proveedor','cantidad','referencia','descripcion'] , 'required'] ,
+            [['cod_barra','cantidad'] , 'integer'] ,
+            [['capsula' , 'referencia', 'familia' , 'subfamilia' , 'talla' , 'proveedor' , 'carac' , 'descapsula'] , 'string' , 'max' => 255] ,
+        ] ;
     }
 
     /**
      * @inheritdoc
      */
-    public function attributeLabels()
-    {
+    public function attributeLabels() {
         return [
-            'cod_barra' => 'Cod Barra',
-            'marca' => 'Marca',
-            'departamento' => 'Departamento',
-            'seccion' => 'Seccion',
-            'familia' => 'Familia',
-            'subfamilia' => 'Subfamilia',
-            'temporada' => 'Temporada',
-            'ano' => 'Año',
-            'capsula' => 'Capsula',
-            'color' => 'Color',
-            'talla' => 'Talla',
-            'proveedor' => 'Proveedor',
-            'cantidad' => 'Cantidad',
-            'referencia' => 'Referencia',
-            'descripcion' => 'Descripcion',
-            'descapsula' => 'Descapsula',
-        ];
+            'cod_barra'    => 'Cod Barra' ,
+            'marca'        => 'Marca' ,
+            'departamento' => 'Departamento' ,
+            'seccion'      => 'Seccion' ,
+            'familia'      => 'Familia' ,
+            'subfamilia'   => 'Subfamilia' ,
+            'temporada'    => 'Temporada' ,
+            'ano'          => 'Año' ,
+            'capsula'      => 'Capsula' ,
+            'color'        => 'Color' ,
+            'talla'        => 'Talla' ,
+            'proveedor'    => 'Proveedor' ,
+            'cantidad'     => 'Cantidad' ,
+            'referencia'   => 'Referencia' ,
+            'descripcion'  => 'Descripcion' ,
+            'descapsula'   => 'Descapsula' ,
+        ] ;
     }
 
 }

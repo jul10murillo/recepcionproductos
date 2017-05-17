@@ -23,6 +23,7 @@
             <file>file:/var/www/recepcionproduc/recepcionproduc/frontend/views/mapping/index.php</file>
             <file>file:/var/www/recepcionproduc/recepcionproduc/frontend/views/reception/_formproductexist.php</file>
             <file>file:/var/www/recepcionproduc/recepcionproduc/frontend/web/css/dumit.css</file>
+            <file>file:/var/www/recepcionproduc/recepcionproduc/frontend/controllers/LogController.php</file>
             <file>file:/var/www/recepcionproduc/recepcionproduc/frontend/views/mapping/view.php</file>
             <file>file:/var/www/recepcionproduc/recepcionproduc/frontend/models/ProductPrev.php</file>
             <file>file:/var/www/recepcionproduc/recepcionproduc/frontend/views/mapping/upload.php</file>
@@ -30,8 +31,8 @@
             <file>file:/var/www/recepcionproduc/recepcionproduc/frontend/components/gruduHelper.php</file>
             <file>file:/var/www/recepcionproduc/recepcionproduc/frontend/views/layouts/main.php</file>
             <file>file:/var/www/recepcionproduc/recepcionproduc/frontend/controllers/ProductController.php</file>
-            <file>file:/var/www/recepcionproduc/recepcionproduc/frontend/controllers/MappingController.php</file>
             <file>file:/var/www/recepcionproduc/recepcionproduc/frontend/models/Mapping.php</file>
+            <file>file:/var/www/recepcionproduc/recepcionproduc/frontend/controllers/MappingController.php</file>
             <file>file:/var/www/recepcionproduc/recepcionproduc/frontend/views/reception/_formnewproduct.php</file>
             <file>file:/var/www/recepcionproduc/recepcionproduc/frontend/views/reception/_modal.php</file>
             <file>file:/var/www/recepcionproduc/recepcionproduc/frontend/controllers/ReceptionController.php</file>

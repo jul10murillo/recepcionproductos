@@ -16,7 +16,6 @@ use yii\bootstrap\Modal;
     <div class="alert alert-warning alert-dismissable fade in">
         <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
         El producto no está en el mapping.
-        <a type="button" data-toggle="modal" data-target="#w0" class="btn btn-link">¿Desea Agregarlo?</a>
     </div>
     <div class="alert alert-danger alert-dismissable fade in">
         <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
@@ -74,7 +73,7 @@ use yii\bootstrap\Modal;
                         <th>Talla</th>
                         <th>Color</th>
                         <th>Cantidad</th>
-                        <th>Acomulado</th>
+                        <th>Acumulado</th>
                         <th>Diferencia</th>
                     </tr>
                 </thead>
@@ -103,16 +102,18 @@ use yii\bootstrap\Modal;
 
 
 <?=
-$this->render('_modal',[
-    'newProduct' => $newProduct,
-    'dataProveedor' => $dataProveedor
-]);
+    $this->render('_modal' , [
+        'newProduct'    => $newProduct ,
+        'dataProveedor' => $dataProveedor ,
+        'mapping'       => $mapping ,
+    ]) ;
 ?>
 
 <?php
 $urlPost = Url::to(['/reception/post-acum']);
 $script = <<< JS
     $( document ).ready(function() {
+        $('.modal').removeAttr('tabindex');
         var countInput = 0;
         var count = 0;
         $(".alert").hide();

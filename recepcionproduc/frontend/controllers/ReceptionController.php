@@ -7,6 +7,8 @@ use app\models\Mapping ;
 use yii\data\ActiveDataProvider ;
 use app\models\Product ;
 use yii\helpers\Json ;
+use yii\helpers\Url ;
+use yii\db\Query ;
 
 class ReceptionController extends \yii\web\Controller {
 
@@ -31,26 +33,24 @@ class ReceptionController extends \yii\web\Controller {
         $mapping = Mapping::find()->where(['id' => $id])->one() ;
         $product = Product::find()->where(['id_mapping' => $id])->andWhere(['not' , ['acumulado' => null]])->all() ;
 
+
         $newProduct    = new Product ;
-        $dataProveedor = $this->dataProveedor($mapping->marca, $id) ;
+        $dataProveedor = $this->dataProveedor($mapping->marca , $id) ;
 
         $sumProduct  = Product::find()->where(['id_mapping' => $id])->sum('cantidad') ;
         $acumProduct = Product::find()->where(['id_mapping' => $id])->sum('acumulado') ;
 
         if (Yii::$app->request->isPost) {
-            $post = Yii::$app->request->post('Product') ;
-            $data = $this->setArrayPostProduct($post , $id) ;
+            
+            $post                   = Yii::$app->request->post('Productnew') ;
+//            print_r($post);exit;
+            $data                   = $this->setArrayPostProduct($post , $id) ;
             $newProduct->attributes = $data ;
             if ($newProduct->validate()) {
-                $newProduct->save();
-                return $this->render('view' , [
-                    'product'       => $product ,
-                    'mapping'       => $mapping ,
-                    'sumProduct'    => $sumProduct ,
-                    'acumProduct'   => $acumProduct ,
-                    'newProduct'    => $newProduct ,
-                    'dataProveedor' => $dataProveedor ,
-                ]) ;
+                $newProduct->save() ;
+                return $this->redirect(Url::to(['/reception/view' , 'id' => $id])) ;
+            }else{
+    print_r($newProduct->errors);exit;
             }
         }
 
@@ -69,7 +69,7 @@ class ReceptionController extends \yii\web\Controller {
      * 
      * @param type $post
      */
-    public function setArrayPostProduct($post,$idMapping) {
+    public function setArrayPostProduct($post , $idMapping) {
         $departamento = explode('-' , $post['departamento']) ;
         $familia      = explode('-' , $post['familia']) ;
         $temporada    = explode('-' , $post['temporada']) ;
@@ -102,13 +102,34 @@ class ReceptionController extends \yii\web\Controller {
         $data['codtalla']      = $talla[1] ;
         $data['proveedor']     = $proveedor[0] ;
         $data['codprov']       = $proveedor[1] ;
-        $data['cantidad']      = $post['cantidad'] ;
+        $data['cantidad']      = ($post['cantidad'])?$post['cantidad']:"" ;
+        $data['referencia']    = ($post['referencia'])?$post['referencia']:''  ;
         $data['descripcion']   = $post['descripcion'] ;
         $data['carac']         = $post['carac'] ;
         $data['id_mapping']    = $post['id_mapping'] ;
         $data['acumulado']     = 1 ;
 
         return $data ;
+    }
+
+    public function actionGetreferencia($q) {
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON ;
+        if (!is_null($q)) {
+            $query          = new Query ;
+            $query->select('referencia AS id, referencia AS text')
+                    ->from('product')
+                    ->where(['like' , 'referencia' , $q])
+                    ->distinct() ;
+            $command        = $query->createCommand() ;
+            $data           = $command->queryAll() ;
+            $out['results'] = array_values($data) ;
+        }
+        elseif ($id > 0) {
+            $out['results'] = ['id' => Product::find()->referencia , 'text' => Product::find()->referencia] ;
+        }
+
+
+        return $out ;
     }
 
     /**
@@ -136,6 +157,30 @@ class ReceptionController extends \yii\web\Controller {
         return $this->render('index' , [
                     'dataProvider' => $dataProvider
                 ]) ;
+    }
+
+    /**
+     * Metodo que se usa para traer producto en ajax
+     * @return boolean
+     */
+    public function actionGetreferenciaajax() {
+        $q = Yii::$app->request->post('ref') ;
+        if (!is_null($q)) {
+            $product                = Product::find()->where(['referencia' => $q])->one() ;
+            $result['departamento'] = $product['departamento'] . '-' . $product['coddepto'] ;
+            $result['seccion']      = $product['seccion'] . '-' . $product['codseccion'] ;
+            $result['familia']      = $product['familia'] . '-' . $product['codfamilia'] ;
+            $result['temporada']    = $product['temporada'] . '-' . $product['codtemporada'] ;
+            $result['ano']          = $product['ano'] . '-' . $product['codano'] ;
+            $result['capsula']      = $product['capsula'] . '-' . $product['codcapsula'] ;
+            $result['proveedor']    = $product['proveedor'] . '-' . $product['codprov'] ;
+            $result['descapsula']   = $product['descapsula'] ;
+            $result['carac']        = $product['carac'] ;
+            $result['descripcion']  = $product['descripcion'] ;
+            $result['subfamilia']   = $product['subfamilia'] ;
+            return Json::encode($result) ;
+        }
+        return false ;
     }
 
     /**
@@ -176,455 +221,11 @@ class ReceptionController extends \yii\web\Controller {
         }
     }
 
-    public function actionFamiliadata() {
-        $q                           = \Yii::$app->request->post('id') ;
-        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON ;
-        $response                    = "" ;
-        if (!is_null($q)) {
-            switch ($q) {
-                case 'TEXTIL-1':
-                    $result = [
-                        [
-                            'text' => 'BLOUSE' ,
-                            'id'   => 'BLOUSE-01' ,
-                        ] ,
-                        [
-                            'text' => 'TOP' ,
-                            'id'   => 'TOP-02' ,
-                        ] ,
-                        [
-                            'text' => 'SHIRT' ,
-                            'id'   => 'SHIRT-04' ,
-                        ] ,
-                        [
-                            'text' => 'SWEATER' ,
-                            'id'   => 'SWEATER-05' ,
-                        ] ,
-                        [
-                            'text' => 'JACKET' ,
-                            'id'   => 'JACKET-06' ,
-                        ] ,
-                        [
-                            'text' => 'BLAZER' ,
-                            'id'   => 'BLAZER-07' ,
-                        ] ,
-                        [
-                            'text' => 'VEST' ,
-                            'id'   => 'VEST-08' ,
-                        ] ,
-                        [
-                            'text' => 'COAT' ,
-                            'id'   => 'COAT-09' ,
-                        ] ,
-                        [
-                            'text' => 'PANT' ,
-                            'id'   => 'PANT-10' ,
-                        ] ,
-                        [
-                            'text' => 'JEAN' ,
-                            'id'   => 'JEAN-11' ,
-                        ] ,
-                        [
-                            'text' => 'JOGGER' ,
-                            'id'   => 'JOGGER-12' ,
-                        ] ,
-                        [
-                            'text' => 'SHORT' ,
-                            'id'   => 'SHORT-13' ,
-                        ] ,
-                        [
-                            'text' => 'SET' ,
-                            'id'   => 'SET-14' ,
-                        ] ,
-                        [
-                            'text' => 'SKIRT' ,
-                            'id'   => 'SKIRT-15' ,
-                        ] ,
-                        [
-                            'text' => 'JUMPER' ,
-                            'id'   => 'JUMPER-16' ,
-                        ] ,
-                        [
-                            'text' => 'DRESS' ,
-                            'id'   => 'DRESS-17' ,
-                        ] ,
-                        [
-                            'text' => 'JUMPSUIT' ,
-                            'id'   => 'JUMPSUIT-18' ,
-                        ] ,
-                        [
-                            'text' => 'CARDIGAN' ,
-                            'id'   => 'CARDIGAN-19' ,
-                        ] ,
-                        [
-                            'text' => 'LEGGING' ,
-                            'id'   => 'LEGGING-20' ,
-                        ] ,
-                        [
-                            'text' => 'POLO' ,
-                            'id'   => 'POLO-21' ,
-                        ] ,
-                            ] ;
-                    foreach ($result as $value) {
-                        $response .= "<option value='" . $value['id'] . "'>" . $value['text'] . "</option>" ;
-                    }
-                    break ;
-                case 'SHOES-2':
-                    $result = [
-                        [
-                            'text' => 'BALLERINA' ,
-                            'id'   => 'BALLERINA-01' ,
-                        ] ,
-                        [
-                            'text' => 'FLAT SANDALS' ,
-                            'id'   => 'FLAT SANDALS-02' ,
-                        ] ,
-                        [
-                            'text' => 'HEEL SANDALS' ,
-                            'id'   => 'HEEL SANDALS-03' ,
-                        ] ,
-                        [
-                            'text' => 'HEEL' ,
-                            'id'   => 'HEEL-04' ,
-                        ] ,
-                        [
-                            'text' => 'SPORT' ,
-                            'id'   => 'SPORT-05' ,
-                        ] ,
-                        [
-                            'text' => 'LOAFER' ,
-                            'id'   => 'LOAFER-06' ,
-                        ] ,
-                        [
-                            'text' => 'FLATS' ,
-                            'id'   => 'FLATS-08' ,
-                        ] ,
-                        [
-                            'text' => 'HIGHT HEEL' ,
-                            'id'   => 'HIGHT HEEL-09' ,
-                        ] ,
-                        [
-                            'text' => 'BOOT' ,
-                            'id'   => 'BOOT-07' ,
-                        ] ,
-                            ] ;
-                    foreach ($result as $value) {
-                        $response .= "<option value='" . $value['id'] . "'>" . $value['text'] . "</option>" ;
-                    }
-                    break ;
-                case 'JEWELRY-3':
-                    $result = [
-                        [
-                            'text' => 'RING' ,
-                            'id'   => 'RING-01' ,
-                        ] ,
-                        [
-                            'text' => 'NECKLACE' ,
-                            'id'   => 'NECKLACE-02' ,
-                        ] ,
-                        [
-                            'text' => 'BRACELET' ,
-                            'id'   => 'BRACELET-03' ,
-                        ] ,
-                        [
-                            'text' => 'SET NECKLACE/EARING' ,
-                            'id'   => 'SET NECKLACE/EARING-04' ,
-                        ] ,
-                        [
-                            'text' => 'SET BRACELET' ,
-                            'id'   => 'SET BRACELET-05' ,
-                        ] ,
-                        [
-                            'text' => 'SET EARINGS' ,
-                            'id'   => 'SET EARINGS-06' ,
-                        ] ,
-                        [
-                            'text' => 'EARINGS' ,
-                            'id'   => 'EARINGS-07' ,
-                        ] ,
-                            ] ;
-                    foreach ($result as $value) {
-                        $response .= "<option value='" . $value['id'] . "'>" . $value['text'] . "</option>" ;
-                    }
-                    break ;
-                case 'ACCESSORIES-4':
-                    $result = [
-                        [
-                            'text' => 'HANDBAG' ,
-                            'id'   => 'HANDBAG-01' ,
-                        ] ,
-                        [
-                            'text' => 'PASHMINA' ,
-                            'id'   => 'PASHMINA-02' ,
-                        ] ,
-                        [
-                            'text' => 'BACKPACK' ,
-                            'id'   => 'BACKPACK-03' ,
-                        ] ,
-                        [
-                            'text' => 'BELT' ,
-                            'id'   => 'BELT-04' ,
-                        ] ,
-                        [
-                            'text' => 'HAT' ,
-                            'id'   => 'HAT-05' ,
-                        ] ,
-                        [
-                            'text' => 'SUNGLASSES' ,
-                            'id'   => 'SUNGLASSES-06' ,
-                        ] ,
-                        [
-                            'text' => 'WALLET' ,
-                            'id'   => 'WALLET-07' ,
-                        ] ,
-                        [
-                            'text' => 'SOCKS' ,
-                            'id'   => 'SOCKS-08' ,
-                        ] ,
-                        [
-                            'text' => 'HANDBAG DAY' ,
-                            'id'   => 'HANDBAG DAY-09' ,
-                        ] ,
-                        [
-                            'text' => 'HANDBAG NIGHT' ,
-                            'id'   => 'HANDBAG NIGHT-10' ,
-                        ] ,
-                            ] ;
-                    foreach ($result as $value) {
-                        $response .= "<option value='" . $value['id'] . "'>" . $value['text'] . "</option>" ;
-                    }
-                    break ;
-            }
-            return Json::encode($response) ;
-        }
-    }
 
     /**
      * 
      * @return type
      */
-    public function actionSubfamiliadata() {
-        $q                           = \Yii::$app->request->post('id') ;
-        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON ;
-        $response                    = "" ;
-        if (!is_null($q)) {
-            switch ($q) {
-                case 'TEXTIL-1':
-                    $result = [
-                        [
-                            'text' => 'BLOUSE' ,
-                            'id'   => 'BLOUSE-01' ,
-                        ] ,
-                        [
-                            'text' => 'TOP' ,
-                            'id'   => 'TOP-02' ,
-                        ] ,
-                        [
-                            'text' => 'SHIRT' ,
-                            'id'   => 'SHIRT-04' ,
-                        ] ,
-                        [
-                            'text' => 'SWEATER' ,
-                            'id'   => 'SWEATER-05' ,
-                        ] ,
-                        [
-                            'text' => 'JACKET' ,
-                            'id'   => 'JACKET-06' ,
-                        ] ,
-                        [
-                            'text' => 'BLAZER' ,
-                            'id'   => 'BLAZER-07' ,
-                        ] ,
-                        [
-                            'text' => 'VEST' ,
-                            'id'   => 'VEST-08' ,
-                        ] ,
-                        [
-                            'text' => 'COAT' ,
-                            'id'   => 'COAT-09' ,
-                        ] ,
-                        [
-                            'text' => 'PANT' ,
-                            'id'   => 'PANT-10' ,
-                        ] ,
-                        [
-                            'text' => 'JEAN' ,
-                            'id'   => 'JEAN-11' ,
-                        ] ,
-                        [
-                            'text' => 'JOGGER' ,
-                            'id'   => 'JOGGER-12' ,
-                        ] ,
-                        [
-                            'text' => 'SHORT' ,
-                            'id'   => 'SHORT-13' ,
-                        ] ,
-                        [
-                            'text' => 'SET' ,
-                            'id'   => 'SET-14' ,
-                        ] ,
-                        [
-                            'text' => 'SKIRT' ,
-                            'id'   => 'SKIRT-15' ,
-                        ] ,
-                        [
-                            'text' => 'JUMPER' ,
-                            'id'   => 'JUMPER-16' ,
-                        ] ,
-                        [
-                            'text' => 'DRESS' ,
-                            'id'   => 'DRESS-17' ,
-                        ] ,
-                        [
-                            'text' => 'JUMPSUIT' ,
-                            'id'   => 'JUMPSUIT-18' ,
-                        ] ,
-                        [
-                            'text' => 'CARDIGAN' ,
-                            'id'   => 'CARDIGAN-19' ,
-                        ] ,
-                        [
-                            'text' => 'LEGGING' ,
-                            'id'   => 'LEGGING-20' ,
-                        ] ,
-                        [
-                            'text' => 'POLO' ,
-                            'id'   => 'POLO-21' ,
-                        ] ,
-                            ] ;
-                    foreach ($result as $value) {
-                        $response .= "<option value='" . $value['id'] . "'>" . $value['text'] . "</option>" ;
-                    }
-                    break ;
-                case 'SHOES-2':
-                    $result = [
-                        [
-                            'text' => 'BALLERINA' ,
-                            'id'   => 'BALLERINA-01' ,
-                        ] ,
-                        [
-                            'text' => 'FLAT SANDALS' ,
-                            'id'   => 'FLAT SANDALS-02' ,
-                        ] ,
-                        [
-                            'text' => 'HEEL SANDALS' ,
-                            'id'   => 'HEEL SANDALS-03' ,
-                        ] ,
-                        [
-                            'text' => 'HEEL' ,
-                            'id'   => 'HEEL-04' ,
-                        ] ,
-                        [
-                            'text' => 'SPORT' ,
-                            'id'   => 'SPORT-05' ,
-                        ] ,
-                        [
-                            'text' => 'LOAFER' ,
-                            'id'   => 'LOAFER-06' ,
-                        ] ,
-                        [
-                            'text' => 'FLATS' ,
-                            'id'   => 'FLATS-08' ,
-                        ] ,
-                        [
-                            'text' => 'HIGHT HEEL' ,
-                            'id'   => 'HIGHT HEEL-09' ,
-                        ] ,
-                        [
-                            'text' => 'BOOT' ,
-                            'id'   => 'BOOT-07' ,
-                        ] ,
-                            ] ;
-                    foreach ($result as $value) {
-                        $response .= "<option value='" . $value['id'] . "'>" . $value['text'] . "</option>" ;
-                    }
-                    break ;
-                case 'JEWELRY-3':
-                    $result = [
-                        [
-                            'text' => 'RING' ,
-                            'id'   => 'RING-01' ,
-                        ] ,
-                        [
-                            'text' => 'NECKLACE' ,
-                            'id'   => 'NECKLACE-02' ,
-                        ] ,
-                        [
-                            'text' => 'BRACELET' ,
-                            'id'   => 'BRACELET-03' ,
-                        ] ,
-                        [
-                            'text' => 'SET NECKLACE/EARING' ,
-                            'id'   => 'SET NECKLACE/EARING-04' ,
-                        ] ,
-                        [
-                            'text' => 'SET BRACELET' ,
-                            'id'   => 'SET BRACELET-05' ,
-                        ] ,
-                        [
-                            'text' => 'SET EARINGS' ,
-                            'id'   => 'SET EARINGS-06' ,
-                        ] ,
-                        [
-                            'text' => 'EARINGS' ,
-                            'id'   => 'EARINGS-07' ,
-                        ] ,
-                            ] ;
-                    foreach ($result as $value) {
-                        $response .= "<option value='" . $value['id'] . "'>" . $value['text'] . "</option>" ;
-                    }
-                    break ;
-                case 'ACCESSORIES-4':
-                    $result = [
-                        [
-                            'text' => 'HANDBAG' ,
-                            'id'   => 'HANDBAG-01' ,
-                        ] ,
-                        [
-                            'text' => 'PASHMINA' ,
-                            'id'   => 'PASHMINA-02' ,
-                        ] ,
-                        [
-                            'text' => 'BACKPACK' ,
-                            'id'   => 'BACKPACK-03' ,
-                        ] ,
-                        [
-                            'text' => 'BELT' ,
-                            'id'   => 'BELT-04' ,
-                        ] ,
-                        [
-                            'text' => 'HAT' ,
-                            'id'   => 'HAT-05' ,
-                        ] ,
-                        [
-                            'text' => 'SUNGLASSES' ,
-                            'id'   => 'SUNGLASSES-06' ,
-                        ] ,
-                        [
-                            'text' => 'WALLET' ,
-                            'id'   => 'WALLET-07' ,
-                        ] ,
-                        [
-                            'text' => 'SOCKS' ,
-                            'id'   => 'SOCKS-08' ,
-                        ] ,
-                        [
-                            'text' => 'HANDBAG DAY' ,
-                            'id'   => 'HANDBAG DAY-09' ,
-                        ] ,
-                        [
-                            'text' => 'HANDBAG NIGHT' ,
-                            'id'   => 'HANDBAG NIGHT-10' ,
-                        ] ,
-                            ] ;
-                    foreach ($result as $value) {
-                        $response .= "<option value='" . $value['id'] . "'>" . $value['text'] . "</option>" ;
-                    }
-                    break ;
-            }
-            return Json::encode($response) ;
-        }
-    }
 
     public function dataProveedor($id) {
         switch ($id) {

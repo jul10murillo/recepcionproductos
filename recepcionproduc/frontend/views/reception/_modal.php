@@ -16,18 +16,20 @@ Modal::begin([
 echo Tabs::widget([
     'items' => [
         [
-            'label' => 'Producto Nuevo',
+            'label' => 'Referencia Nueva',
             'content' => $this->render('_formnewproduct',[
                             'model' => $newProduct,
-                            'dataProveedor' => $dataProveedor
+                            'dataProveedor' => $dataProveedor,
+                            'mapping' => $mapping
                         ]),
             'active' => true
         ],
         [
-            'label' => 'Producto existente',
+            'label' => 'Referencia existente',
             'content' => $this->render('_formproductexist',[
                             'model' => $newProduct,
-                            'dataProveedor' => $dataProveedor
+                            'dataProveedor' => $dataProveedor,
+                            'mapping' => $mapping
                         ]),
         ],
     ],
