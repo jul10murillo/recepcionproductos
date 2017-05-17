@@ -120,10 +120,10 @@ $script = <<< JS
         $( "#count" ).val(0);
     });
     
-    $('#cod_bar').on('keyup focus', function(e){
-
+    $('#cod_bar').on('keyup', function(e){
         if( $(this).val().length >= 14 ){
             var cod_barra = $( this ).val();
+            $( "#cod_bar" ).val("");
             $.post( "$urlPost", { cod_barra: cod_barra })
                 .done(function( data) {
                     if(data === '0'){
@@ -132,7 +132,6 @@ $script = <<< JS
                             $(".alert").slideUp(500);
                         });
                         cod_barra = $( "#cod_bar" ).val();
-                        $( "#cod_bar" ).val("");
                         setDataModal( cod_barra, "$mapping->marca", "$mapping->id");
 
                     } else if (data === '1') {
@@ -159,7 +158,10 @@ $script = <<< JS
                         }
                     }
                 });
+            return false;
         }
+        e.stopPropagation();
+        e.preventDefault();
     });
         
     function setDatagridAppend( obj ){

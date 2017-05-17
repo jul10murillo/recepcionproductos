@@ -3,6 +3,7 @@
 namespace app\models;
 
 use Yii;
+use common\models\User;
 
 /**
  * This is the model class for table "log".
@@ -13,6 +14,8 @@ use Yii;
  * @property integer $id_mapping
  * @property string $fecha
  * @property integer $id_producto
+ * @property integer $acumulado
+ * @property integer $cantidad
  *
  * @property Mapping $idMapping
  * @property Product $idProducto
@@ -34,8 +37,8 @@ class Log extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id_user', 'operacion', 'id_mapping', 'fecha'], 'required'],
-            [['id_user', 'id_mapping', 'id_producto'], 'integer'],
+            [['id_user', 'operacion', 'id_mapping', 'fecha', 'acumulado', 'cantidad'], 'required'],
+            [['id_user', 'id_mapping', 'id_producto', 'acumulado', 'cantidad'], 'integer'],
             [['operacion'], 'string'],
             [['fecha'], 'safe'],
             [['id_mapping'], 'exist', 'skipOnError' => true, 'targetClass' => Mapping::className(), 'targetAttribute' => ['id_mapping' => 'id']],
@@ -56,6 +59,8 @@ class Log extends \yii\db\ActiveRecord
             'id_mapping' => 'Id Mapping',
             'fecha' => 'Fecha',
             'id_producto' => 'Id Producto',
+            'acumulado' => 'Acumulado',
+            'cantidad' => 'Cantidad',
         ];
     }
 
@@ -80,6 +85,6 @@ class Log extends \yii\db\ActiveRecord
      */
     public function getIdUser()
     {
-        return $this->hasOne(\common\models\User::className(), ['id' => 'id_user']);
+        return $this->hasOne(User::className(), ['id' => 'id_user']);
     }
 }

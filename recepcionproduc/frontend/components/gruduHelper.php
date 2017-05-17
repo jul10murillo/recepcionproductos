@@ -9,6 +9,8 @@ use ruskid\csvimporter\CSVImporter ;
 use ruskid\csvimporter\CSVReader ;
 use ruskid\csvimporter\MultipleImportStrategy ;
 use yii\helpers\Url ;
+use app\models\Log ;
+
 
 class gruduHelper extends Component {
 
@@ -592,12 +594,17 @@ class gruduHelper extends Component {
     
     public function setLog($param) {
         $data = [
-            'id_user' => $param['id_user'],
+            'id_user' => Yii::$app->user->id,
             'operacion' => $param['operacion'],
             'id_mapping' => $param['id_mapping'],
             'fecha' => date("Y-m-d H:i:s"),
             'id_producto' => ($param['id_producto']) ? $param['id_producto'] : '',
+            'acumulado' => ($param['acumulado']) ? $param['acumulado'] : '',
+            'cantidad' => ($param['cantidad']) ? $param['cantidad'] : '',
         ];
+        $log = new Log();
+        $log->attributes = $data;
+        $log->save();
     }
 
 }

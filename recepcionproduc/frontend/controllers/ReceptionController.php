@@ -43,14 +43,11 @@ class ReceptionController extends \yii\web\Controller {
         if (Yii::$app->request->isPost) {
             
             $post                   = Yii::$app->request->post('Productnew') ;
-//            print_r($post);exit;
             $data                   = $this->setArrayPostProduct($post , $id) ;
             $newProduct->attributes = $data ;
             if ($newProduct->validate()) {
                 $newProduct->save() ;
                 return $this->redirect(Url::to(['/reception/view' , 'id' => $id])) ;
-            }else{
-    print_r($newProduct->errors);exit;
             }
         }
 
@@ -199,6 +196,15 @@ class ReceptionController extends \yii\web\Controller {
                 }
                 $newAcumProduct = $acumProduct + 1 ;
                 Yii::$app->db->createCommand()->update('product' , ['acumulado' => $newAcumProduct] , ['cod_barra' => $cod_barra])->execute() ;
+                $product   = Product::find()->where(['cod_barra' => $cod_barra])->one() ;
+                $param = [
+                    'operacion'=> 'Conteo',
+                    'id_mapping'=> $product['id_mapping'],
+                    'id_producto'=> $product['id'],
+                    'acumulado'=> $product['acumulado'],
+                    'cantidad'=> $product['cantidad'],
+                ];
+                Yii::$app->gruduHelper->setLog($param);
             }
             else {
                 return 1 ;
