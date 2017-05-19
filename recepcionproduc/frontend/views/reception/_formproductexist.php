@@ -9,17 +9,19 @@ use yii\helpers\ArrayHelper ;
 use app\models\Product ;
 use app\models\Productnew ;
 use yii\helpers\Url ;
+use yii\widgets\Pjax ;
 
 //print_r($dataSubFamilia);exit;
 $urlFamilia    = Url::to(['/reception/getFamilia']) ;
 $urlReferencia = Url::to(['/reception/getreferencia' , 'id' => $mapping->id]) ;
 
-$model = new Productnew() ;
-
+//Pjax::begin(); 
 $form   = ActiveForm::begin(
                 [
 //                    'action' => Url::to(['reception/processproduct']), 
                     'type'       => ActiveForm::TYPE_HORIZONTAL ,
+                    'enableAjaxValidation' => true,
+//                    'options' => ['data-pjax' => true ],
                     'formConfig' => ['labelSpan' => 3 , 'deviceSize' => ActiveForm::SIZE_SMALL]
                 ]
         ) ;
@@ -27,7 +29,7 @@ $form   = ActiveForm::begin(
 <br>
 <div class="col-lg-6 col-lg-offset-3">
     <?=
-    $form->field($model , 'cod_barra')->textInput() ;
+    $form->field($model , 'cod_barra',['enableAjaxValidation' => true])->textInput() ;
     ?>
 </div>
 <div class="col-lg-6">
@@ -147,13 +149,16 @@ $form   = ActiveForm::begin(
 </div>
 
 <div class="form-group">
-<?= Html::submitButton('Submit' , ['class' => 'btn btn-primary btn-block']) ?>
+<?= Html::submitButton('Submit' , ['class' => 'btn btn-primary btn-block','id'=>'submit']) ?>
 </div>
-<?php ActiveForm::end() ; ?>
+<?php ActiveForm::end() ; 
+// Pjax::end();
+?>
 
 <?php
 $urlRef = \yii\helpers\Url::to(['reception/getreferenciaajax']) ;
 $script = <<< JS
+
     $('#productnew-referencia').on('change', function(e){
         $.post( "$urlRef", { ref: $(this).val() })
             .done(function( data) {

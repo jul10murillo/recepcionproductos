@@ -104,6 +104,7 @@ use yii\bootstrap\Modal;
 <?=
     $this->render('_modal' , [
         'newProduct'    => $newProduct ,
+        'newProduct1'    => $newProduct1 ,
         'dataProveedor' => $dataProveedor ,
         'mapping'       => $mapping ,
     ]) ;

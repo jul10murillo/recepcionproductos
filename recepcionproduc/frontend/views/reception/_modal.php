@@ -27,7 +27,7 @@ echo Tabs::widget([
         [
             'label' => 'Referencia existente',
             'content' => $this->render('_formproductexist',[
-                            'model' => $newProduct,
+                            'model' => $newProduct1,
                             'dataProveedor' => $dataProveedor,
                             'mapping' => $mapping
                         ]),

@@ -3,6 +3,7 @@
 namespace app\models ;
 
 use Yii ;
+use app\models\Product;
 
 /**
  * This is the model class for table "product".
@@ -76,6 +77,12 @@ class Productnew extends \yii\base\Model {
             [['cod_barra','marca','departamento','seccion','familia','subfamilia','temporada','ano','capsula','color','talla','proveedor','cantidad','referencia','descripcion'] , 'required'] ,
             [['cod_barra','cantidad'] , 'integer'] ,
             [['capsula' , 'referencia', 'familia' , 'subfamilia' , 'talla' , 'proveedor' , 'carac' , 'descapsula'] , 'string' , 'max' => 255] ,
+            [
+                   'cod_barra', 
+                   'unique', 
+                   'targetClass' => 'app\models\Product',
+                   'message'     => 'Codigo barra existe',
+               ]
         ] ;
     }
 
@@ -101,6 +108,18 @@ class Productnew extends \yii\base\Model {
             'descripcion'  => 'Descripcion' ,
             'descapsula'   => 'Descapsula' ,
         ] ;
+    }
+    
+    /**
+     * 
+     * @param type $param
+     */
+    public function validateCodbarra($attribute) {
+        $product = Product::find()->where(['cod_barra'=> $this->$attribute])->one();
+        echo 'ss' ;
+        if (isset($product)) {
+            $this->addError('cod_barra', 'Código de barra ya existe');
+        }
     }
 
 }

@@ -9,6 +9,10 @@ use app\models\Product ;
 use yii\helpers\Json ;
 use yii\helpers\Url ;
 use yii\db\Query ;
+use yii\widgets\ActiveForm ;
+use yii\web\Response ;
+USE app\models\Productnew;
+
 
 class ReceptionController extends \yii\web\Controller {
 
@@ -34,20 +38,32 @@ class ReceptionController extends \yii\web\Controller {
         $product = Product::find()->where(['id_mapping' => $id])->andWhere(['not' , ['acumulado' => null]])->all() ;
 
 
-        $newProduct    = new Product ;
+        $newProduct  = new Productnew ;
+        $newProduct1 = new Productnew ;
+
         $dataProveedor = $this->dataProveedor($mapping->marca , $id) ;
 
         $sumProduct  = Product::find()->where(['id_mapping' => $id])->sum('cantidad') ;
         $acumProduct = Product::find()->where(['id_mapping' => $id])->sum('acumulado') ;
 
+        if ( Yii::$app->request->isAjax && $newProduct1->load(Yii::$app->request->post())) {
+            \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON ;
+//            $newProduct->cod_barra       = Yii::$app->request->post('Productnew')['cod_barra'] ;
+            echo json_encode(ActiveForm::validate($newProduct1));
+            \Yii::$app->end();
+        }
+
         if (Yii::$app->request->isPost) {
-            
             $post                   = Yii::$app->request->post('Productnew') ;
             $data                   = $this->setArrayPostProduct($post , $id) ;
             $newProduct->attributes = $data ;
             if ($newProduct->validate()) {
                 $newProduct->save() ;
                 return $this->redirect(Url::to(['/reception/view' , 'id' => $id])) ;
+            }
+            else {
+                print_r($newProduct->errors) ;
+                exit ;
             }
         }
 
@@ -58,8 +74,13 @@ class ReceptionController extends \yii\web\Controller {
                     'sumProduct'    => $sumProduct ,
                     'acumProduct'   => $acumProduct ,
                     'newProduct'    => $newProduct ,
+                    'newProduct1'   => $newProduct1 ,
                     'dataProveedor' => $dataProveedor ,
                 ]) ;
+    }
+    
+    public function validateCodBarra($codBarra) {
+        
     }
 
     /**
@@ -99,8 +120,8 @@ class ReceptionController extends \yii\web\Controller {
         $data['codtalla']      = $talla[1] ;
         $data['proveedor']     = $proveedor[0] ;
         $data['codprov']       = $proveedor[1] ;
-        $data['cantidad']      = ($post['cantidad'])?$post['cantidad']:"" ;
-        $data['referencia']    = ($post['referencia'])?$post['referencia']:''  ;
+        $data['cantidad']      = ($post['cantidad']) ? $post['cantidad'] : "" ;
+        $data['referencia']    = ($post['referencia']) ? $post['referencia'] : '' ;
         $data['descripcion']   = $post['descripcion'] ;
         $data['carac']         = $post['carac'] ;
         $data['id_mapping']    = $post['id_mapping'] ;
@@ -196,15 +217,15 @@ class ReceptionController extends \yii\web\Controller {
                 }
                 $newAcumProduct = $acumProduct + 1 ;
                 Yii::$app->db->createCommand()->update('product' , ['acumulado' => $newAcumProduct] , ['cod_barra' => $cod_barra])->execute() ;
-                $product   = Product::find()->where(['cod_barra' => $cod_barra])->one() ;
-                $param = [
-                    'operacion'=> 'Conteo',
-                    'id_mapping'=> $product['id_mapping'],
-                    'id_producto'=> $product['id'],
-                    'acumulado'=> $product['acumulado'],
-                    'cantidad'=> $product['cantidad'],
-                ];
-                Yii::$app->gruduHelper->setLog($param);
+                $product        = Product::find()->where(['cod_barra' => $cod_barra])->one() ;
+                $param          = [
+                    'operacion'   => 'Conteo' ,
+                    'id_mapping'  => $product['id_mapping'] ,
+                    'id_producto' => $product['id'] ,
+                    'acumulado'   => $product['acumulado'] ,
+                    'cantidad'    => $product['cantidad'] ,
+                ] ;
+                Yii::$app->gruduHelper->setLog($param) ;
             }
             else {
                 return 1 ;
@@ -227,12 +248,10 @@ class ReceptionController extends \yii\web\Controller {
         }
     }
 
-
     /**
      * 
      * @return type
      */
-
     public function dataProveedor($id) {
         switch ($id) {
             case 'Aishop':

@@ -4,6 +4,7 @@ namespace frontend\controllers;
 
 use app\models\Log;
 use yii\data\ActiveDataProvider;
+use yii\helpers\Url;
 
 class LogController extends \yii\web\Controller
 {
@@ -21,6 +22,21 @@ class LogController extends \yii\web\Controller
                     'dataProvider' => $dataProvider
                 ]) ;
         
+    }
+    public function actionReview() {
+        $items = [
+            [
+                'label' => 'Carga' ,
+                'url'   => Url::to(['/log/charge']) ,
+            ] ,
+            [
+                'label' => 'Recepción' ,
+                'url'   => Url::to(['/log/index']) ,
+            ] ,
+        ] ;
+        return $this->render('review',[
+            'items'=>$items
+        ]);
     }
 
 }
