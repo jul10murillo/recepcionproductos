@@ -74,7 +74,7 @@ class Productnew extends \yii\base\Model {
      */
     public function rules() {
         return [
-            [['cod_barra','marca','departamento','seccion','familia','subfamilia','temporada','ano','capsula','color','talla','proveedor','cantidad','referencia','descripcion'] , 'required'] ,
+            [['cod_barra','marca','departamento','seccion','familia','temporada','ano','capsula','color','talla','proveedor','cantidad','referencia','descripcion'] , 'required'] ,
             [['cod_barra','cantidad'] , 'integer'] ,
             [['capsula' , 'referencia', 'familia' , 'subfamilia' , 'talla' , 'proveedor' , 'carac' , 'descapsula'] , 'string' , 'max' => 255] ,
             [

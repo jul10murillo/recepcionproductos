@@ -48,17 +48,22 @@ class ReceptionController extends \yii\web\Controller {
 
         if ( Yii::$app->request->isAjax && $newProduct1->load(Yii::$app->request->post())) {
             \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON ;
-//            $newProduct->cod_barra       = Yii::$app->request->post('Productnew')['cod_barra'] ;
             echo json_encode(ActiveForm::validate($newProduct1));
             \Yii::$app->end();
         }
 
         if (Yii::$app->request->isPost) {
             $post                   = Yii::$app->request->post('Productnew') ;
+//            print_r($post);exit;
             $data                   = $this->setArrayPostProduct($post , $id) ;
             $newProduct->attributes = $data ;
+            $newProduct1->attributes = $data ;
             if ($newProduct->validate()) {
                 $newProduct->save() ;
+                return $this->redirect(Url::to(['/reception/view' , 'id' => $id])) ;
+            }
+            if ($newProduct1->validate()) {
+                $newProduct1->save() ;
                 return $this->redirect(Url::to(['/reception/view' , 'id' => $id])) ;
             }
             else {
