@@ -62,15 +62,25 @@ class ReceptionController extends \yii\web\Controller {
             $postnew   = Yii::$app->request->post('Productnew') ;
             $postexist = Yii::$app->request->post('Productexist') ;
             if (isset($postnew)) {
-                $data                   = $this->setArrayPostProduct($postnew , $id) ;
+                $data = $this->setArrayPostProduct($postnew , $id) ;
             }
             else {
-                $data                    = $this->setArrayPostProduct($postexist , $id) ;
+                $data = $this->setArrayPostProduct($postexist , $id) ;
             }
-            $productnew = new Product;
+            $productnew             = new Product ;
             $productnew->attributes = $data ;
             if ($productnew->validate()) {
                 $productnew->save() ;
+                
+                $param          = [
+                    'operacion'   => 'Crear Producto' ,
+                    'id_mapping'  => $productnew['id_mapping'] ,
+                    'id_producto' => $productnew['id'] ,
+                    'acumulado'   => $productnew['acumulado'] ,
+                    'cantidad'    => $productnew['cantidad'] ,
+                ] ;
+                Yii::$app->gruduHelper->setLog($param) ;
+                
                 return $this->redirect(Url::to(['/reception/view' , 'id' => $id])) ;
             }
         }
