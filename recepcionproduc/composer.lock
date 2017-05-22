@@ -539,12 +539,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/kartik-v/yii2-export.git",
-                "reference": "e0563601f2a3b9d428df1c289f3a2813423deef5"
+                "reference": "b1503f83086c0e11bf0142ff744659e66676277f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/kartik-v/yii2-export/zipball/e0563601f2a3b9d428df1c289f3a2813423deef5",
-                "reference": "e0563601f2a3b9d428df1c289f3a2813423deef5",
+                "url": "https://api.github.com/repos/kartik-v/yii2-export/zipball/b1503f83086c0e11bf0142ff744659e66676277f",
+                "reference": "b1503f83086c0e11bf0142ff744659e66676277f",
                 "shasum": ""
             },
             "require": {
@@ -591,7 +591,7 @@
                 "xlsx",
                 "yii2"
             ],
-            "time": "2017-04-25 09:31:09"
+            "time": "2017-05-08 19:16:52"
         },
         {
             "name": "kartik-v/yii2-grid",
