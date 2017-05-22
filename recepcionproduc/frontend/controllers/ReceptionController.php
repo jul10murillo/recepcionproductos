@@ -39,7 +39,7 @@ class ReceptionController extends \yii\web\Controller {
 
 
         $newProduct  = new Productnew ;
-        $newProduct1 = new Productnew ;
+        $newProduct1 = new \app\models\Productexist ;
 
         $dataProveedor = $this->dataProveedor($mapping->marca , $id) ;
 
@@ -48,27 +48,30 @@ class ReceptionController extends \yii\web\Controller {
 
         if ( Yii::$app->request->isAjax && $newProduct1->load(Yii::$app->request->post())) {
             \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON ;
-            echo json_encode(ActiveForm::validate($newProduct1));
-            \Yii::$app->end();
+            
+            $error = json_encode(ActiveForm::validate($newProduct1));
+            
+            if ($error != '[]'){
+                echo $error;
+                \Yii::$app->end();
+            }
+            
         }
 
         if (Yii::$app->request->isPost) {
-            $post                   = Yii::$app->request->post('Productnew') ;
-//            print_r($post);exit;
-            $data                   = $this->setArrayPostProduct($post , $id) ;
-            $newProduct->attributes = $data ;
-            $newProduct1->attributes = $data ;
-            if ($newProduct->validate()) {
-                $newProduct->save() ;
-                return $this->redirect(Url::to(['/reception/view' , 'id' => $id])) ;
-            }
-            if ($newProduct1->validate()) {
-                $newProduct1->save() ;
-                return $this->redirect(Url::to(['/reception/view' , 'id' => $id])) ;
+            $postnew   = Yii::$app->request->post('Productnew') ;
+            $postexist = Yii::$app->request->post('Productexist') ;
+            if (isset($postnew)) {
+                $data                   = $this->setArrayPostProduct($postnew , $id) ;
             }
             else {
-                print_r($newProduct->errors) ;
-                exit ;
+                $data                    = $this->setArrayPostProduct($postexist , $id) ;
+            }
+            $productnew = new Product;
+            $productnew->attributes = $data ;
+            if ($productnew->validate()) {
+                $productnew->save() ;
+                return $this->redirect(Url::to(['/reception/view' , 'id' => $id])) ;
             }
         }
 

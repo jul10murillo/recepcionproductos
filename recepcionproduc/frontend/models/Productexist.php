@@ -48,7 +48,7 @@ use app\models\Product;
  *
  * @property Mapping $idMapping
  */
-class Productnew extends \yii\base\Model {
+class Productexist extends \yii\base\Model {
 
     public $cod_barra ;
     public $marca ;
@@ -74,9 +74,9 @@ class Productnew extends \yii\base\Model {
      */
     public function rules() {
         return [
-            [['cod_barra','marca','departamento','seccion','familia','temporada','ano','capsula','color','talla','proveedor','cantidad','referencia','descripcion'] , 'required'] ,
+            [['cod_barra','referencia','color','talla'] , 'required'] ,
             [['cod_barra','cantidad'] , 'integer'] ,
-            [['capsula' , 'referencia', 'familia' , 'subfamilia' , 'talla' , 'proveedor' , 'carac' , 'descapsula'] , 'string' , 'max' => 255] ,
+            [['referencia', 'talla'] , 'string' , 'max' => 255] ,
             [
                    'cod_barra', 
                    'unique', 
@@ -116,6 +116,7 @@ class Productnew extends \yii\base\Model {
      */
     public function validateCodbarra($attribute) {
         $product = Product::find()->where(['cod_barra'=> $this->$attribute])->one();
+        echo 'ss' ;
         if (isset($product)) {
             $this->addError('cod_barra', 'Código de barra ya existe');
         }

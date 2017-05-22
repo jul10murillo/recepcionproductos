@@ -24,6 +24,7 @@
             <file>file:/var/www/recepcionproduc/recepcionproduc/frontend/views/log/index.php</file>
             <file>file:/var/www/recepcionproduc/recepcionproduc/frontend/controllers/LogController.php</file>
             <file>file:/var/www/recepcionproduc/recepcionproduc/frontend/models/Log.php</file>
+            <file>file:/var/www/recepcionproduc/recepcionproduc/frontend/views/reception/_modal.php</file>
             <file>file:/var/www/recepcionproduc/recepcionproduc/frontend/controllers/ReceptionController.php</file>
             <file>file:/var/www/recepcionproduc/recepcionproduc/frontend/views/reception/index.php</file>
             <file>file:/var/www/recepcionproduc/recepcionproduc/frontend/views/reception/view.php</file>
