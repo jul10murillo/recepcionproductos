@@ -79,6 +79,13 @@ class MappingController extends \yii\web\Controller
             if ($model->validate() && $model->save()) {
                 $id = $model->id;
                 $this->importDataProduct($id);
+                
+                $param          = [
+                    'operacion'   => 'Mapping Subido' ,
+                    'id_mapping'  => $id ,
+                ] ;
+                Yii::$app->gruduHelper->setLog($param) ;
+                
                 Yii::$app->session->setFlash('success', "Se ha validado exitosamente");
                 return $this->redirect([Url::to('/mapping/index'),'M'=>$valBrand]);
             } 
@@ -123,5 +130,6 @@ class MappingController extends \yii\web\Controller
         
         $productPrev = ProductPrev::find()->select($products)->all();
         Yii::$app->db->createCommand()->batchInsert(Product::tableName(), $productArray, $productPrev)->execute();
+        
     }
 }

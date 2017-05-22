@@ -598,9 +598,9 @@ class gruduHelper extends Component {
             'operacion' => $param['operacion'],
             'id_mapping' => $param['id_mapping'],
             'fecha' => date("Y-m-d H:i:s"),
-            'id_producto' => ($param['id_producto']) ? $param['id_producto'] : '',
-            'acumulado' => ($param['acumulado']) ? $param['acumulado'] : '',
-            'cantidad' => ($param['cantidad']) ? $param['cantidad'] : '',
+            'id_producto' => isset($param['id_producto']) ? $param['id_producto'] : '',
+            'acumulado' => isset($param['acumulado']) ? $param['acumulado'] : '',
+            'cantidad' => isset($param['cantidad']) ? $param['cantidad'] : '',
         ];
         $log = new Log();
         $log->attributes = $data;

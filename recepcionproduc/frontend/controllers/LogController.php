@@ -10,7 +10,7 @@ class LogController extends \yii\web\Controller
 {
     public function actionIndex() {
         $dataProvider = new ActiveDataProvider([
-            'query' => Log::find() ,
+            'query' => Log::find()->where(['not', ['id_producto' => null]]) ,
             'sort' => [
                 'defaultOrder' => [
                     'fecha' => SORT_DESC
@@ -19,6 +19,21 @@ class LogController extends \yii\web\Controller
             ]) ;
 
         return $this->render('index' , [
+                    'dataProvider' => $dataProvider
+                ]) ;
+        
+    }
+    public function actionCharge() {
+        $dataProvider = new ActiveDataProvider([
+            'query' => Log::find()->where(['id_producto' => null]) ,
+            'sort' => [
+                'defaultOrder' => [
+                    'fecha' => SORT_DESC
+                ]
+            ],
+            ]) ;
+
+        return $this->render('charge' , [
                     'dataProvider' => $dataProvider
                 ]) ;
         

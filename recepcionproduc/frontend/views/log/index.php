@@ -8,7 +8,7 @@ use kartik\export\ExportMenu;
 ?>
 
 <h2>
-    Log
+    Log de recepcion
 </h2>
 <?=
 

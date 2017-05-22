@@ -37,7 +37,7 @@ class Log extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id_user', 'operacion', 'id_mapping', 'fecha', 'acumulado', 'cantidad'], 'required'],
+            [['id_user', 'operacion', 'id_mapping', 'fecha'], 'required'],
             [['id_user', 'id_mapping', 'id_producto', 'acumulado', 'cantidad'], 'integer'],
             [['operacion'], 'string'],
             [['fecha'], 'safe'],
