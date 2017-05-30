@@ -65,37 +65,39 @@ use yii\bootstrap\Modal;
         <br>
         <br>
         <div class="row">
-            <table class="table" >
-                <thead>
-                    <tr>
-                        <th>Cod Barra</th>
-                        <th>Referencia</th>
-                        <th>Talla</th>
-                        <th>Color</th>
-                        <th>Cantidad</th>
-                        <th>Acumulado</th>
-                        <th>Diferencia</th>
-                    </tr>
-                </thead>
-                <tbody id="gridAcum">
-                    <?php
+            <div class="container-grid">
+                <table class="table" >
+                    <thead>
+                        <tr>
+                            <th>Cod Barra</th>
+                            <th>Referencia</th>
+                            <th>Talla</th>
+                            <th>Color</th>
+                            <th>Cantidad</th>
+                            <th>Acumulado</th>
+                            <th>Diferencia</th>
+                        </tr>
+                    </thead>
+                    <tbody id="gridAcum">
+                        <?php
                         foreach ($product as $value) :
-                        $dif = $value->cantidad - $value->acumulado;
-                    ?>
-                    <tr id="<?= $value->cod_barra?>">
-                        <td><?= $value->cod_barra?></td>
-                        <td><?= $value->referencia?></td>
-                        <td><?= $value->talla?></td>
-                        <td><?= $value->color?></td>
-                        <td><?= $value->cantidad?></td>
-                        <td><?= $value->acumulado?></td>
-                        <td><?= $dif?></td>
-                    </tr>
-                    <?php
+                            $dif = $value->cantidad - $value->acumulado ;
+                            ?>
+                            <tr id="<?= $value->cod_barra ?>">
+                                <td><?= $value->cod_barra ?></td>
+                                <td><?= $value->referencia ?></td>
+                                <td><?= $value->talla ?></td>
+                                <td><?= $value->color ?></td>
+                                <td><?= $value->cantidad ?></td>
+                                <td><?= $value->acumulado ?></td>
+                                <td><?= $dif ?></td>
+                            </tr>
+                            <?php
                         endforeach ;
-                    ?>
-                </tbody>
-            </table>
+                        ?>
+                    </tbody>
+                </table>
+            </div>  
         </div>
     </div>
 </div>

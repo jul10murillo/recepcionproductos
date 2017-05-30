@@ -10,6 +10,28 @@ use yii\helpers\Url;
 
 class ProductController extends \yii\web\Controller
 {
+    public function behaviors()
+    {
+        return [
+            'access' => [
+                'class' => AccessControl::className(),
+                'only' => ['index', 'view'],
+                'rules' => [
+                    [
+                        'actions' => ['index', 'view'],
+                        'allow' => true,
+                        'roles' => ['@'],
+                    ],
+                    [
+                        'actions' => ['index', 'view'],
+                        'allow' => false,
+                        'roles' => ['?'],
+                    ],
+                ],
+            ],
+        ];
+    }
+    
     public function actionIndex() {
 
         $items = [

@@ -22,3 +22,7 @@ and open the template in the editor.
     overflow-y: scroll;
     height: 700px;
 }
+.grid-reception{
+    height: 555px;
+    overflow-y: scroll;
+}

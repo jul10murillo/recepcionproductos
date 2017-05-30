@@ -35,6 +35,7 @@ class ComposerStaticInit751bbec724dff72a7917d262b19fa38c
         ),
         'm' => 
         array (
+            'mikehaertl\\tmp\\' => 15,
             'mdm\\admin\\' => 10,
         ),
         'k' => 
@@ -53,6 +54,7 @@ class ComposerStaticInit751bbec724dff72a7917d262b19fa38c
         ),
         'c' => 
         array (
+            'codemix\\excelexport\\' => 20,
             'cebe\\markdown\\' => 14,
         ),
         'W' => 
@@ -136,6 +138,10 @@ class ComposerStaticInit751bbec724dff72a7917d262b19fa38c
             1 => __DIR__ . '/..' . '/phpdocumentor/type-resolver/src',
             2 => __DIR__ . '/..' . '/phpdocumentor/reflection-docblock/src',
         ),
+        'mikehaertl\\tmp\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/mikehaertl/php-tmpfile/src',
+        ),
         'mdm\\admin\\' => 
         array (
             0 => __DIR__ . '/..' . '/mdmsoft/yii2-admin',
@@ -183,6 +189,10 @@ class ComposerStaticInit751bbec724dff72a7917d262b19fa38c
         'kartik\\base\\' => 
         array (
             0 => __DIR__ . '/..' . '/kartik-v/yii2-krajee-base',
+        ),
+        'codemix\\excelexport\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/codemix/yii2-excelexport/src',
         ),
         'cebe\\markdown\\' => 
         array (

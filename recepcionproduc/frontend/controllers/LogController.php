@@ -8,6 +8,28 @@ use yii\helpers\Url;
 
 class LogController extends \yii\web\Controller
 {
+    public function behaviors()
+    {
+        return [
+            'access' => [
+                'class' => AccessControl::className(),
+                'only' => ['delete', 'review','index'],
+                'rules' => [
+                    [
+                        'actions' => ['delete', 'review','index'],
+                        'allow' => true,
+                        'roles' => ['@'],
+                    ],
+                    [
+                        'actions' => ['delete', 'review','index'],
+                        'allow' => false,
+                        'roles' => ['?'],
+                    ],
+                ],
+            ],
+        ];
+    }
+    
     public function actionIndex() {
         $dataProvider = new ActiveDataProvider([
             'query' => Log::find()->where(['not', ['id_producto' => null]]) ,
@@ -27,10 +49,10 @@ class LogController extends \yii\web\Controller
         $dataProvider = new ActiveDataProvider([
             'query' => Log::find()->where(['id_producto' => null]) ,
             'sort' => [
-                'defaultOrder' => [
-                    'fecha' => SORT_DESC
-                ]
-            ],
+                    'defaultOrder' => [
+                        'fecha' => SORT_DESC
+                    ]
+                ],
             ]) ;
 
         return $this->render('charge' , [

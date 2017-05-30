@@ -11,6 +11,28 @@ use app\models\ProductPrev;
 
 class MappingController extends \yii\web\Controller
 {
+    public function behaviors()
+    {
+        return [
+            'access' => [
+                'class' => AccessControl::className(),
+                'only' => ['export', 'index','review','validate','view'],
+                'rules' => [
+                    [
+                        'actions' => ['export', 'index','review','validate','view'],
+                        'allow' => true,
+                        'roles' => ['@'],
+                    ],
+                    [
+                        'actions' => ['export', 'index','review','validate','view'],
+                        'allow' => false,
+                        'roles' => ['?'],
+                    ],
+                ],
+            ],
+        ];
+    }
+    
     public function actionExport()
     {
         return $this->render('export');

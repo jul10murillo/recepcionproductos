@@ -11,11 +11,32 @@ use yii\helpers\Url ;
 use yii\db\Query ;
 use yii\widgets\ActiveForm ;
 use yii\web\Response ;
-USE app\models\Productnew;
-
+use app\models\Productnew ;
+use yii\filters\AccessControl ;
 
 class ReceptionController extends \yii\web\Controller {
 
+    public function behaviors()
+    {
+        return [
+            'access' => [
+                'class' => AccessControl::className(),
+                'only' => ['delete', 'export','getrefererencia','index','post-acum','view'],
+                'rules' => [
+                    [
+                        'actions' => ['delete', 'export','getrefererencia','index','post-acum','view'],
+                        'allow' => true,
+                        'roles' => ['@'],
+                    ],
+                    [
+                        'actions' => ['delete', 'export','getrefererencia','index','post-acum','view'],
+                        'allow' => false,
+                        'roles' => ['?'],
+                    ],
+                ],
+            ],
+        ];
+    }
     /**
      * 
      * @return type
@@ -46,16 +67,15 @@ class ReceptionController extends \yii\web\Controller {
         $sumProduct  = Product::find()->where(['id_mapping' => $id])->sum('cantidad') ;
         $acumProduct = Product::find()->where(['id_mapping' => $id])->sum('acumulado') ;
 
-        if ( Yii::$app->request->isAjax && $newProduct1->load(Yii::$app->request->post())) {
+        if (Yii::$app->request->isAjax && $newProduct1->load(Yii::$app->request->post())) {
             \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON ;
-            
-            $error = json_encode(ActiveForm::validate($newProduct1));
-            
-            if ($error != '[]'){
-                echo $error;
-                \Yii::$app->end();
+
+            $error = json_encode(ActiveForm::validate($newProduct1)) ;
+
+            if ($error != '[]') {
+                echo $error ;
+                \Yii::$app->end() ;
             }
-            
         }
 
         if (Yii::$app->request->isPost) {
@@ -71,16 +91,16 @@ class ReceptionController extends \yii\web\Controller {
             $productnew->attributes = $data ;
             if ($productnew->validate()) {
                 $productnew->save() ;
-                
-                $param          = [
+
+                $param = [
                     'operacion'   => 'Crear Producto' ,
                     'id_mapping'  => $productnew['id_mapping'] ,
                     'id_producto' => $productnew['id'] ,
                     'acumulado'   => $productnew['acumulado'] ,
                     'cantidad'    => $productnew['cantidad'] ,
-                ] ;
+                        ] ;
                 Yii::$app->gruduHelper->setLog($param) ;
-                
+
                 return $this->redirect(Url::to(['/reception/view' , 'id' => $id])) ;
             }
         }
@@ -96,7 +116,7 @@ class ReceptionController extends \yii\web\Controller {
                     'dataProveedor' => $dataProveedor ,
                 ]) ;
     }
-    
+
     public function validateCodBarra($codBarra) {
         
     }
@@ -242,7 +262,7 @@ class ReceptionController extends \yii\web\Controller {
                     'id_producto' => $product['id'] ,
                     'acumulado'   => $product['acumulado'] ,
                     'cantidad'    => $product['cantidad'] ,
-                ] ;
+                        ] ;
                 Yii::$app->gruduHelper->setLog($param) ;
             }
             else {
@@ -264,6 +284,57 @@ class ReceptionController extends \yii\web\Controller {
         else {
             return 0 ;
         }
+    }
+
+    public function actionExport($id) {
+        $mapping = Mapping::findOne($id) ;
+        $file    = \Yii::createObject([
+                    'class'  => 'codemix\excelexport\ExcelFile' ,
+                    'sheets' => [
+                        'MAPPING' => [
+                            'class'      => 'codemix\excelexport\ActiveExcelSheet' ,
+                            'query'      => Product::find()->where(['id_mapping' => $id]) ,
+                            'attributes' => [
+                                'cod_barra' ,
+                                'marca' ,
+                                'departamento' ,
+                                'seccion' ,
+                                'familia' ,
+                                'subfamilia' ,
+                                'temporada' ,
+                                'ano' ,
+                                'capsula' ,
+                                'color' ,
+                                'talla' ,
+                                'proveedor' ,
+                                'cantidad' ,
+                                'pvptienda' ,
+                                'peso' ,
+                                'serie' ,
+                                'referencia' ,
+                                'descripcion' ,
+                                'costodist' ,
+                                'pvpmgta' ,
+                                'carac' ,
+                                'gpeso' ,
+                                'codmarca' ,
+                                'coddepto' ,
+                                'codseccion' ,
+                                'codfamilia' ,
+                                'codsubfamilia' ,
+                                'codtemporada' ,
+                                'codano' ,
+                                'codcapsula' ,
+                                'codcolor' ,
+                                'codtalla' ,
+                                'codprov' ,
+                                'descapsula' ,
+                                'acumulado'
+                            ] ,
+                        ]
+                    ]
+        ]) ;
+        $file->send(substr($mapping->archivo , 0 , -4) . '.xlsx') ;
     }
 
     /**
