@@ -5,7 +5,6 @@ use kartik\grid\GridView ;
 use kartik\export\ExportMenu ;
 use yii\widgets\Pjax ;
 
-$this->title = 'My Yii Application' ;
 ?>
 <div class="site-index">
     <?php
