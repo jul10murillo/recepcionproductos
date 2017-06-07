@@ -13,6 +13,10 @@ use yii\bootstrap\Alert;
 /* @var $this yii\web\View */
 /* @var $model app\models\Mapping */
 /* @var $form ActiveForm */
+
+$this->title = 'Ingresar Mapping';
+$this->params['breadcrumbs'][] = ['label' => 'Marcas', 'url' => Url::to(['/product/index'])];
+$this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="mapping-upload">
     <div class="text-center">

@@ -8,6 +8,7 @@ use yii\data\ActiveDataProvider;
 use yii\helpers\Url;
 use app\models\Product;
 use app\models\ProductPrev;
+use yii\filters\AccessControl;
 
 class MappingController extends \yii\web\Controller
 {

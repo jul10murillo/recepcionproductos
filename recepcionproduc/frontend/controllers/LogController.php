@@ -5,6 +5,7 @@ namespace frontend\controllers;
 use app\models\Log;
 use yii\data\ActiveDataProvider;
 use yii\helpers\Url;
+use yii\filters\AccessControl ;
 
 class LogController extends \yii\web\Controller
 {

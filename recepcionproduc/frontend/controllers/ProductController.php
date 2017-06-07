@@ -6,6 +6,7 @@ use Yii;
 use app\models\Product;
 use yii\data\ActiveDataProvider;
 use yii\helpers\Url;
+use yii\filters\AccessControl;
 
 
 class ProductController extends \yii\web\Controller

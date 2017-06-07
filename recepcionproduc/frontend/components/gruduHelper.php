@@ -10,6 +10,8 @@ use ruskid\csvimporter\CSVReader ;
 use ruskid\csvimporter\MultipleImportStrategy ;
 use yii\helpers\Url ;
 use app\models\Log ;
+use yii\db\Query ; 
+use yii\helpers\ArrayHelper ;
 
 
 class gruduHelper extends Component {
@@ -284,21 +286,22 @@ class gruduHelper extends Component {
      * @return string
      */
     public function setBrand($M) {
-        switch ($M) {
-            case '1':
-                $marca = 'Aishop' ;
-                break ;
-            case '2':
-                $marca = 'Exotik' ;
-                break ;
-            case '3':
-                $marca = 'Vesimenta' ;
-                break ;
-            case '4':
-                $marca = 'Xinfoni' ;
-                break ;
-        }
-        return $marca ;
+        $marca = (new \yii\db\Query())
+                ->select('nombre')
+                ->from('marca')
+                ->where(['id' => $M])
+                ->one() ;
+        return $marca['nombre'] ;
+    }
+    
+    public function getDataProveedor($id) {
+        $result = ( new Query())
+                ->select('*')
+                ->from('proveedor')
+                ->where(['idmarca'=>$id])
+                ->all();
+        return ArrayHelper::map($result, 'codproveedor', 'nombre');
+        
     }
 
     /**
@@ -306,13 +309,14 @@ class gruduHelper extends Component {
      * @return string
      */
     public function getDataDepartamento() {
-        return [
-            '' => '' ,
-            'WOMAN-1' => 'WOMAN' ,
-            'MAN-2'   => 'MAN' ,
-            'KIDS-3'  => 'KIDS' ,
-            'BABY-4'  => 'BABY' ,
-                ] ;
+        
+        $result = ( new Query())
+                ->select('*')
+                ->from('departamento')
+                ->all();
+                
+        return ArrayHelper::map($result, 'coddepartamento', 'nombre');
+        
     }
 
     /**
@@ -320,13 +324,13 @@ class gruduHelper extends Component {
      * @return string
      */
     public function getDataSeccion() {
-        return [
-            ''      => '' ,
-            'TEXTIL-1'      => 'TEXTIL' ,
-            'SHOES-2'       => 'SHOES' ,
-            'JEWELRY-3'     => 'JEWELRY' ,
-            'ACCESSORIES-4' => 'ACCESSORIES' ,
-                ] ;
+        $result = ( new Query())
+                ->select('*')
+                ->from('seccion')
+                ->all();
+                
+        return ArrayHelper::map($result, 'codseccion', 'nombre');
+        
     }
 
     /**
@@ -334,16 +338,13 @@ class gruduHelper extends Component {
      * @return string
      */
     public function getDataTemporada() {
-        return [
-            ''  => '' ,
-            'SPRING-S'  => 'SPRING' ,
-            'SUMMER-U'  => 'SUMMER' ,
-            'FALL-F'    => 'FALL' ,
-            'WINTER-W'  => 'WINTER' ,
-            'HOLIDAY-H' => 'HOLIDAY' ,
-            'RESORT-R'  => 'RESORT' ,
-            'TRAVEL-T'  => 'TRAVEL' ,
-                ] ;
+        $result = ( new Query())
+                ->select('*')
+                ->from('temporada')
+                ->all();
+                
+        return ArrayHelper::map($result, 'codtemporada', 'nombre');
+
     }
 
     /**
@@ -351,13 +352,12 @@ class gruduHelper extends Component {
      * @return string
      */
     public function getDataAno() {
-        return [
-            '' => '' ,
-            '2015-15' => '2015' ,
-            '2016-16' => '2016' ,
-            '2017-17' => '2017' ,
-            '2018-18' => '2018' ,
-                ] ;
+        $result = ( new Query())
+                ->select('*')
+                ->from('ano')
+                ->all();
+                
+        return ArrayHelper::map($result, 'codano', 'nombre');
     }
 
     /**
@@ -365,21 +365,12 @@ class gruduHelper extends Component {
      * @return string
      */
     public function getDataCapsula() {
-        return [
-            ''   => '' ,
-            'JANUARY-1'   => 'JANUARY' ,
-            'FEBRUARY-2'  => 'FEBRUARY' ,
-            'MARCH-3'     => 'MARCH' ,
-            'APRIL-1'     => 'APRIL' ,
-            'MAY-2'       => 'MAY' ,
-            'JUNE-3'      => 'JUNE' ,
-            'JULY-1'      => 'JULY' ,
-            'AUGUST-2'    => 'AUGUST' ,
-            'SEPTEMBER-3' => 'SEPTEMBER' ,
-            'OCTOBER-1'   => 'OCTOBER' ,
-            'NOVEMBER-2'  => 'NOVEMBER' ,
-            'DECEMBER-3'  => 'DECEMBER' ,
-                ] ;
+        $result = ( new Query())
+                ->select('*')
+                ->from('capsula')
+                ->all();
+                
+        return ArrayHelper::map($result, 'id', 'nombre');
     }
 
     /**
@@ -387,20 +378,14 @@ class gruduHelper extends Component {
      * @return string
      */
     public function getDataTalla() {
-        return [
-            ''       => '' ,
-            'XS-01'       => 'XS' ,
-            'S-02'        => 'S' ,
-            'M-03'        => 'M' ,
-            'L-04'        => 'L' ,
-            'XL-05'       => 'XL' ,
-            'ONE SIZE-06' => 'ONE SIZE' ,
-            '26-07'       => '26' ,
-            '27-08'       => '27' ,
-            '28-09'       => '28' ,
-            '29-10'       => '29' ,
-            '30-11'       => '30' ,
-                ] ;
+        
+        $result = ( new Query())
+                ->select('*')
+                ->from('talla')
+                ->all();
+                
+        return ArrayHelper::map($result, 'id', 'nombre');
+       
     }
 
     /**
@@ -408,14 +393,12 @@ class gruduHelper extends Component {
      * @return string
      */
     public function getSubFamilia() {
-        for ($i = 0 ; $i <= 999 ; $i++) {
-            $value            = str_pad($i , 3 , 0 , STR_PAD_LEFT) ;
-            $dataSubFamilia[] = [
-                'id'   => $value ,
-                'text' => $value ,
-                    ] ;
-        }
-        return $dataSubFamilia ;
+        $result = ( new Query())
+                ->select('*')
+                ->from('subfamilia')
+                ->all();
+                
+        return ArrayHelper::map($result, 'id', 'codsubfamilia');
     }
 
     /**
@@ -423,88 +406,18 @@ class gruduHelper extends Component {
      * @return string
      */
     public function getFamiliaInicial() {
-        $dataFamilia = [
-            [
-                'text' => 'BLOUSE' ,
-                'id'   => 'BLOUSE-01' ,
-            ] ,
-            [
-                'text' => 'TOP' ,
-                'id'   => 'TOP-02' ,
-            ] ,
-            [
-                'text' => 'SHIRT' ,
-                'id'   => 'SHIRT-04' ,
-            ] ,
-            [
-                'text' => 'SWEATER' ,
-                'id'   => 'SWEATER-05' ,
-            ] ,
-            [
-                'text' => 'JACKET' ,
-                'id'   => 'JACKET-06' ,
-            ] ,
-            [
-                'text' => 'BLAZER' ,
-                'id'   => 'BLAZER-07' ,
-            ] ,
-            [
-                'text' => 'VEST' ,
-                'id'   => 'VEST-08' ,
-            ] ,
-            [
-                'text' => 'COAT' ,
-                'id'   => 'COAT-09' ,
-            ] ,
-            [
-                'text' => 'PANT' ,
-                'id'   => 'PANT-10' ,
-            ] ,
-            [
-                'text' => 'JEAN' ,
-                'id'   => 'JEAN-11' ,
-            ] ,
-            [
-                'text' => 'JOGGER' ,
-                'id'   => 'JOGGER-12' ,
-            ] ,
-            [
-                'text' => 'SHORT' ,
-                'id'   => 'SHORT-13' ,
-            ] ,
-            [
-                'text' => 'SET' ,
-                'id'   => 'SET-14' ,
-            ] ,
-            [
-                'text' => 'SKIRT' ,
-                'id'   => 'SKIRT-15' ,
-            ] ,
-            [
-                'text' => 'JUMPER' ,
-                'id'   => 'JUMPER-16' ,
-            ] ,
-            [
-                'text' => 'DRESS' ,
-                'id'   => 'DRESS-17' ,
-            ] ,
-            [
-                'text' => 'JUMPSUIT' ,
-                'id'   => 'JUMPSUIT-18' ,
-            ] ,
-            [
-                'text' => 'CARDIGAN' ,
-                'id'   => 'CARDIGAN-19' ,
-            ] ,
-            [
-                'text' => 'LEGGING' ,
-                'id'   => 'LEGGING-20' ,
-            ] ,
-            [
-                'text' => 'POLO' ,
-                'id'   => 'POLO-21' ,
-            ] ,
-                ] ;
+        $result = ( new Query())
+                ->select('*')
+                ->from('familia')
+                ->all();
+        
+        foreach ($result as $key => $value) {
+            $dataFamilia[] = [
+                'text' => $value['nombre'] ,
+                'id' => $value['nombre'].'-'.$value['codfamilia'] ,
+            ] ;
+        }
+        
         return $dataFamilia ;
     }
 
@@ -513,82 +426,12 @@ class gruduHelper extends Component {
      * @return string
      */
     public function getDataColor() {
-        return [
-            'WHITE-01'         => 'WHITE' ,
-            'OFF WHITE-02'     => 'OFF' ,
-            'IVORY-03'         => 'IVORY' ,
-            'WHITE PRINT-05'   => 'WHITE PRINT' ,
-            'BLUE PRINT-08'    => 'BLUE PRINT' ,
-            'AQUA-09'          => 'AQUA' ,
-            'BLUE-10'          => 'BLUE' ,
-            'DEEP BLUE-11'     => 'DEEP BLUE' ,
-            'LIGHT BLUE-12'    => 'LIGHT BLUE' ,
-            'SKY BLUE-13'      => 'SKY BLUE' ,
-            'BLUE GREY-14'     => 'BLUE GREY' ,
-            'INDIGO-15'        => 'INDIGO' ,
-            'NAVY-16'          => 'NAVY' ,
-            'TURQUOISE-17'     => 'TURQUOISE' ,
-            'YELLOW-20'        => 'YELLOW' ,
-            'MUSTARD-21'       => 'MUSTARD' ,
-            'APRICOT-22'       => 'APRICOT' ,
-            'LEMON-23'         => 'LEMON' ,
-            'YELLOW PRINT-24'  => 'YELLOW PRINT' ,
-            'ORANGE-30'        => 'ORANGE' ,
-            'ORANGE PRINT-31'  => 'ORANGE PRINT' ,
-            'RED PRINT-38'     => 'RED PRINT' ,
-            'BRICK-39'         => 'BRICK' ,
-            'RED-40'           => 'RED' ,
-            'CORAL-41'         => 'CORAL' ,
-            'RUST-42'          => 'RUST' ,
-            'ROSE-43'          => 'ROSE' ,
-            'WINE-44'          => 'WINE' ,
-            'PEACH-45'         => 'PEACH' ,
-            'PINK PRINT-49'    => 'PINK PRINT' ,
-            'PINK-50'          => 'PINK' ,
-            'DUST PINK-51'     => 'DUST PINK' ,
-            'LIGHT PINK-52'    => 'LIGHT PINK' ,
-            'FUSCHIA-53'       => 'FUSCHIA' ,
-            'LILY-54'          => 'LILY' ,
-            'PURPLE-55'        => 'PURPLE' ,
-            'LIGHT PURPLE-56'  => 'LIGHT PURPLE' ,
-            'GREEN PRINT-59'   => 'GREEN PRINT' ,
-            'GREEN-60'         => 'GREEN' ,
-            'OLIVE-61'         => 'OLIVE' ,
-            'EMERALD-62'       => 'EMERALD' ,
-            'LIGHT GREEN-63'   => 'LIGHT GREEN' ,
-            'ARMY GREEN-64'    => 'ARMY GREEN' ,
-            'LIME-65'          => 'LIME' ,
-            'BEIGE PRINT-68'   => 'BEIGE PRINT' ,
-            'DUST-69'          => 'DUST' ,
-            'BROWN-70'         => 'BROWN' ,
-            'CAMEL-71'         => 'CAMEL' ,
-            'KHAKI-72'         => 'KHAKI' ,
-            'BEIGE-73'         => 'BEIGE' ,
-            'NUDE-74'          => 'NUDE' ,
-            'TAUPE-75'         => 'TAUPE' ,
-            'TAN-76'           => 'TAN' ,
-            'COFFEE-77'        => 'COFFEE' ,
-            'BROWN PRINT-78'   => 'BROWN PRINT' ,
-            'BLACK-80'         => 'BLACK' ,
-            'CHARCOAL-81'      => 'CHARCOAL' ,
-            'GREY-82'          => 'GREY' ,
-            'SILVER PRINT-83'  => 'SILVER PRINT' ,
-            'GOLD PRINT-84'    => 'GOLD PRINT' ,
-            'PEWTER-85'        => 'PEWTER' ,
-            'BLACK PRINT-86'   => 'BLACK PRINT' ,
-            'LIGHT GREY-87'    => 'LIGHT GREY' ,
-            'GREY PRINT-88'    => 'GREY' ,
-            'MULTI-90'         => 'MULTI' ,
-            'SNAKE-91'         => 'SNAKE' ,
-            'METALLICS-92'     => 'METALLICS' ,
-            'MULTI NEON-93'    => 'MULTI NEON' ,
-            'MULTI PASTEL-94'  => 'MULTI PASTEL' ,
-            'GOLD+SILVER-95'   => 'GOLD' ,
-            'BLACK & WHITE-96' => 'BLACK & WHITE' ,
-            'ANIMAL PRINT-97'  => 'ANIMAL PRINT' ,
-            'GOLD-98'          => 'GOLD' ,
-            'SILVER-99'        => 'SILVER' ,
-                ] ;
+        $result = ( new Query())
+                ->select('*')
+                ->from('color')
+                ->all();
+                
+        return ArrayHelper::map($result, 'codcolor', 'nombre');
     }
     
     
@@ -606,5 +449,114 @@ class gruduHelper extends Component {
         $log->attributes = $data;
         $log->save();
     }
+    
+    public function getDepartamento($id) {
+        $result = ( new Query())
+                ->select('nombre')
+                ->from('departamento')
+                ->where(['coddepartamento'=>$id])
+                ->one();
+                
+        return $result['nombre'];
+    }
+    
+    public function getSeccion($id) {
+        $result = ( new Query())
+                ->select('nombre')
+                ->from('seccion')
+                ->where(['codseccion'=>$id])
+                ->one();
+                
+        return $result['nombre'];
+    }
+    
+    public function getTemporada($id) {
+        $result = ( new Query())
+                ->select('nombre')
+                ->from('temporada')
+                ->where(['codtemporada'=>$id])
+                ->one();
+                
+        return $result['nombre'];
+    }
+    
+    public function getAno($id) {
+        $result = ( new Query())
+                ->select('nombre')
+                ->from('ano')
+                ->where(['codano'=>$id])
+                ->one();
+                
+        return $result['nombre'];
+    }
+    
+    public function getCapsula($id) {
+        $result = ( new Query())
+                ->select('nombre')
+                ->from('capsula')
+                ->where(['id'=>$id])
+                ->one();
+                
+        return $result['nombre'];
+    }
+    
+    public function getCapsulaCod($id) {
+        $result = ( new Query())
+                ->select('capsulacol')
+                ->from('capsula')
+                ->where(['id'=>$id])
+                ->one();
+                
+        return $result['capsulacol'];
+    }
+    
+    public function getColor($id) {
+        $result = ( new Query())
+                ->select('nombre')
+                ->from('color')
+                ->where(['codcolor'=>$id])
+                ->one();
+                
+        return $result['nombre'];
+    }
+    
+    public function getTalla($id) {
+        $result = ( new Query())
+                ->select('nombre')
+                ->from('talla')
+                ->where(['id'=>$id])
+                ->one();
+                
+        return $result['nombre'];
+    }
+    public function getTallaCod($id) {
+        $result = ( new Query())
+                ->select('nombre')
+                ->from('talla')
+                ->where(['id'=>$id])
+                ->one();
+                
+        return $result['nombre'];
+    }
+    
+    public function getProveedor($id) {
+        $result = ( new Query())
+                ->select('nombre')
+                ->from('proveedor')
+                ->where(['codproveedor'=>$id])
+                ->one();
+                
+        return $result['nombre'];
+    }
+    
+//    public function getProveedorCod($id) {
+//        $result = ( new Query())
+//                ->select('nombre')
+//                ->from('proveedor')
+//                ->where(['codproveedor'=>$id])
+//                ->one();
+//                
+//        return $result['nombre'];
+//    }
 
 }

@@ -1,30 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
-    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="2">
+    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="4">
+        <file>
+            <url>frontend/controllers/ReceptionController.php</url>
+            <bookmark id="4">
+                <name/>
+                <line>153</line>
+                <key/>
+            </bookmark>
+            <bookmark id="3">
+                <name/>
+                <line>279</line>
+                <key/>
+            </bookmark>
+        </file>
         <file>
             <url>frontend/controllers/MappingController.php</url>
             <bookmark id="1">
                 <name/>
-                <line>29</line>
+                <line>52</line>
                 <key/>
             </bookmark>
             <bookmark id="2">
                 <name/>
-                <line>124</line>
+                <line>147</line>
                 <key/>
             </bookmark>
         </file>
     </editor-bookmarks>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/var/www/recepcionproduc/recepcionproduc/frontend/views/mapping/index.php</file>
-            <file>file:/var/www/recepcionproduc/recepcionproduc/frontend/components/gruduHelper.php</file>
-            <file>file:/var/www/recepcionproduc/recepcionproduc/frontend/views/log/index.php</file>
-            <file>file:/var/www/recepcionproduc/recepcionproduc/frontend/controllers/MappingController.php</file>
-            <file>file:/var/www/recepcionproduc/recepcionproduc/frontend/controllers/LogController.php</file>
-            <file>file:/var/www/recepcionproduc/recepcionproduc/frontend/models/Log.php</file>
+            <file>file:/var/www/recepcionproduc/recepcionproduc/frontend/views/reception/_formnewproduct.php</file>
             <file>file:/var/www/recepcionproduc/recepcionproduc/frontend/controllers/ReceptionController.php</file>
-            <file>file:/var/www/recepcionproduc/recepcionproduc/frontend/views/log/charge.php</file>
+            <file>file:/var/www/recepcionproduc/recepcionproduc/frontend/views/reception/view.php</file>
         </group>
     </open-files>
 </project-private>

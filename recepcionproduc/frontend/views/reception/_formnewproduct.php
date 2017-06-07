@@ -32,6 +32,8 @@ $form = ActiveForm::begin(
         'pluginOptions' => [
             'allowClear' => true
         ],
+        'prompt' => '-- Seleccione Departamento --',
+        
     ]); ?>
     <?= $form->field($model,'familia')->dropDownList(ArrayHelper::map(Yii::$app->gruduHelper->getFamiliaInicial(),'id','text'), [
         'options' => ['placeholder' => 'Seleccionar Familia ...'],
@@ -40,17 +42,21 @@ $form = ActiveForm::begin(
                     .done(function(data) {
                         console.log(data);
                         $( "#productnew-familia" ).html( data );
-                    });'
+                    });',
+        'prompt' => '-- Seleccione Familia --',
         ]); 
         ?>
     <?= $form->field($model,'temporada')->dropDownList(Yii::$app->gruduHelper->getDataTemporada(), [
         'options' => ['placeholder' => 'Seleccionar Temporada ...'],
+        'prompt' => '-- Seleccione Temporada --',
         ]); ?>
     <?= $form->field($model,'capsula')->dropDownList(Yii::$app->gruduHelper->getDataCapsula(), [
         'options' => ['placeholder' => 'Seleccionar Capsula ...'],
+        'prompt' => '-- Seleccione Capsula --',
         ]); ?>
     <?= $form->field($model,'talla')->dropDownList(Yii::$app->gruduHelper->getDataTalla(), [
         'options' => ['placeholder' => 'Seleccionar Talla ...'],
+        'prompt' => '-- Seleccione Talla --',
         ]); ?>
     <?= $form->field($model,'cantidad') ?>
     <?= $form->field($model,'carac') ?>
@@ -64,20 +70,25 @@ $form = ActiveForm::begin(
                     .done(function(data) {
                         console.log(data);
                         $( "#productnew-familia" ).html( data );
-                    });'
+                    });',
+        'prompt' => '-- Seleccione Seccion --',
     ]); ?>
-    <?= $form->field($model,'subfamilia')->dropDownList(ArrayHelper::map(Yii::$app->gruduHelper->getSubFamilia(), 'id' , 'text'), [
+    <?= $form->field($model,'subfamilia')->dropDownList(Yii::$app->gruduHelper->getSubFamilia(), [
         'options' => ['placeholder' => 'Seleccionar Subfamilia ...'],
+        'prompt' => '-- Seleccione Subfamilia --',
         ]); ?>
     <?= $form->field($model,'ano')->dropDownList(Yii::$app->gruduHelper->getDataAno(), [
         'options' => ['placeholder' => 'Seleccionar Ano ...'],
+        'prompt' => '-- Seleccione Año --',
         ]); ?>
     <?= $form->field($model,'descapsula') ?>
     <?= $form->field($model,'color')->dropDownList(Yii::$app->gruduHelper->getDataColor(), [
         'options' => ['placeholder' => 'Seleccionar Color ...'],
+        'prompt' => '-- Seleccione Color --',
         ]); ?>
-    <?= $form->field($model,'proveedor')->dropDownList(ArrayHelper::map($dataProveedor, 'id' , 'text'), [
+    <?= $form->field($model,'proveedor')->dropDownList($dataProveedor, [
         'options' => ['placeholder' => 'Seleccionar Proveedor ...'],
+        'prompt' => '-- Seleccione Proveedor --',
         ]); ?>
     <?= $form->field($model,'descripcion') ?>
     <?= $form->field($model,'id_mapping')->hiddenInput(['value'=>$mapping->id])->label(false); ?>

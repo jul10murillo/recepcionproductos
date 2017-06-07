@@ -5,6 +5,11 @@
 use kartik\grid\GridView ;
 use yii\helpers\Html ;
 use kartik\export\ExportMenu;
+use yii\helpers\Url ;
+
+$this->title = 'Carga de Mapping';
+$this->params['breadcrumbs'][] = ['label' => 'Log', 'url' => Url::to(['/log/review'])];
+$this->params['breadcrumbs'][] = $this->title;
 ?>
 
 <h2>

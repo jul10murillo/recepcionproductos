@@ -4,6 +4,9 @@
 use kartik\grid\GridView ;
 use kartik\export\ExportMenu ;
 use yii\bootstrap\Nav;
+
+$this->title = 'Marcas';
+$this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="site-index">
     <h2>

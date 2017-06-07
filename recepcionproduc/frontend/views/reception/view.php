@@ -4,13 +4,17 @@
 use yii\bootstrap\Html;
 use yii\helpers\Url;
 use yii\bootstrap\Modal;
+use kartik\form\ActiveForm ;
 
+$this->title = 'Conteo';
+$this->params['breadcrumbs'][] = ['label' => 'Recepción', 'url' => Url::to(['/reception/index'])];
+$this->params['breadcrumbs'][] = $this->title;
 ?>
 
 <div class="product-view">
     <div class="page-header">
         <h2>
-            <?= substr($mapping->archivo, 0, -4);  ?>
+            <?= substr($mapping->archivo, 0, -4); ?>
         </h2>
     </div>
     <div class="alert alert-warning alert-dismissable fade in">
@@ -29,19 +33,19 @@ use yii\bootstrap\Modal;
                 </h3>
                 <div class="col-lg-10" >
                     <?=
-                    Html::input('text' , 'cod_barra' , '' , [
-                        'autofocus' => 'autofocus' ,
-                        'id'        => 'cod_bar' ,
-                        'class'     => 'form-control' ,
-                        'tabindex'  => '1',
-                        'addon' => ['prepend' => ['content'=>'@']]
-                        ]) ;
+                    Html::input('text', 'cod_barra', '', [
+                        'autofocus' => 'autofocus',
+                        'id' => 'cod_bar',
+                        'class' => 'form-control',
+                        'tabindex' => '1',
+                        'addon' => ['prepend' => ['content' => '@']]
+                    ]);
                     ?>
                 </div>
                 <div class="col-lg-2" >
                     <a type="button" data-toggle="modal" data-target="#w0" class="btn btn-primary">+</a>
                 </div>
-               
+
             </div>
             <div class="col-lg-3">
                 <h3>
@@ -81,7 +85,7 @@ use yii\bootstrap\Modal;
                     <tbody id="gridAcum">
                         <?php
                         foreach ($product as $value) :
-                            $dif = $value->cantidad - $value->acumulado ;
+                            $dif = $value->cantidad - $value->acumulado;
                             ?>
                             <tr id="<?= $value->cod_barra ?>">
                                 <td><?= $value->cod_barra ?></td>
@@ -93,7 +97,7 @@ use yii\bootstrap\Modal;
                                 <td><?= $dif ?></td>
                             </tr>
                             <?php
-                        endforeach ;
+                        endforeach;
                         ?>
                     </tbody>
                 </table>
@@ -104,13 +108,52 @@ use yii\bootstrap\Modal;
 
 
 <?=
-    $this->render('_modal' , [
-        'newProduct'    => $newProduct ,
-        'newProduct1'    => $newProduct1 ,
-        'dataProveedor' => $dataProveedor ,
-        'mapping'       => $mapping ,
-    ]) ;
+$this->render('_modal', [
+    'newProduct' => $newProduct,
+    'newProduct1' => $newProduct1,
+    'dataProveedor' => $dataProveedor,
+    'mapping' => $mapping,
+]);
 ?>
+
+<?php
+Modal::begin([
+    'header' => '<h2>Contar Producto</h2>',
+    'size' => Modal::SIZE_LARGE
+]);
+
+$form = ActiveForm::begin(
+                [
+                    'action'=> Url::to(['/reception/setcountref']),
+                    'type' => ActiveForm::TYPE_HORIZONTAL,
+                    'formConfig' => ['labelSpan' => 3, 'deviceSize' => ActiveForm::SIZE_SMALL]
+                ]
+        );
+?>
+
+<div class="content">
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>Cod Barra</th>
+                <th>Talla</th>
+                <th>Color</th>
+                <th>Seleccionar</th>
+                <th>Cantidad</th>
+            </tr>
+        </thead>
+        <tbody id="cont_ref">
+            
+        </tbody>
+    </table>
+</div>
+
+<div class="form-group">
+        <?= Html::submitButton('Enviar' , ['class' => 'btn btn-primary btn-block']) ?>
+</div>
+
+<?php ActiveForm::end() ; ?>
+<?php Modal::end(); ?>
 
 <?php
 $urlPost = Url::to(['/reception/post-acum']);
@@ -145,19 +188,11 @@ $script = <<< JS
                         $( "#cod_bar" ).val("");
 
                     }else{
-                        $( "#cod_bar" ).val("");
-                        countInput = 0 ;
-                        
-                        var count = parseInt($( "#count" ).text());
-                        $( "#count" ).text(count + 1);
-                            
                         var obj = JSON.parse( data );
-
-                        var cod_barra = obj.cod_barra.toString();
-                        if($("#" + cod_barra).length == 0) {
-                            setDatagridAppend(obj);
+                        if ( typeof obj[0] == "undefined" ) {
+                            setcodbarra(obj);
                         }else{
-                            setDatagridHtml(obj);
+                            setreferencia(obj);
                         }
                     }
                 });
@@ -166,6 +201,37 @@ $script = <<< JS
         e.stopPropagation();
         e.preventDefault();
     });
+        
+    function setcodbarra( obj ){
+        $( "#cod_bar" ).val("");
+        countInput = 0 ;
+        var count = parseInt($( "#count" ).text());
+        $( "#count" ).text(count + 1);
+        var cod_barra = obj.cod_barra.toString();
+        if($("#" + cod_barra).length == 0) {
+            setDatagridAppend(obj);
+        }else{
+            setDatagridHtml(obj);
+        }
+    }
+        
+    function setreferencia( obj ){
+        $('#cont_ref #product').remove();
+        $.each( obj, function( key, value ) {
+            $( ' #cont_ref ' ).prepend('<tr id="product"><td>' + value.cod_barra + '</td><td>' + value.talla + '</td><td>' + value.color + '</td><td><input type="checkbox" id="codigobarra" name="cod_barra" value="' + value.cod_barra + '"></td><td><div class="col-lg-4 col-md-4"><input type="text" class="form-control input-sm" name="' + value.cod_barra + '" id="cod_' + value.cod_barra + '" disabled></div></td></tr>');
+            $("#w4").modal();
+        });
+        $( ' #cont_ref ' ).prepend('<input type="hidden" name="id" value="$mapping->id">');
+        $( "input:checkbox" ).change(function(){
+            if ($(this).is(':checked')) {
+                $("#cod_"+ $(this).val()).prop('disabled', false);
+                $("#cod_"+ $(this).val()).val(1);
+            }else{
+                $("#cod_"+ $(this).val()).val('');
+                $("#cod_"+ $(this).val()).prop('disabled', true);
+            }
+        });  
+    }
         
     function setDatagridAppend( obj ){
         var cod_barra = obj.cod_barra.toString();
@@ -200,7 +266,10 @@ $script = <<< JS
         $( ' #product-marca ' ).val(marca);
         $( ' #product-id_mapping ' ).val(id_mapping);
     }
+     
+     
         
+
         
 JS;
 $this->registerJs($script);

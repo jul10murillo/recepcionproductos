@@ -5,6 +5,9 @@
 use kartik\grid\GridView ;
 use yii\bootstrap\Html ;
 use yii\helpers\Url ;
+
+$this->title = 'Recepción';
+$this->params['breadcrumbs'][] = $this->title;
 ?>
 
 <?=

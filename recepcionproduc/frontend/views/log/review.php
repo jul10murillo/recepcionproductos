@@ -4,6 +4,9 @@
 use kartik\grid\GridView ;
 use kartik\export\ExportMenu ;
 use yii\bootstrap\Nav;
+
+$this->title = 'Log';
+$this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="review-index">
     <h2>

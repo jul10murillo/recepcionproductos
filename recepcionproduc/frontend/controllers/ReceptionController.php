@@ -1,35 +1,34 @@
 <?php
 
-namespace frontend\controllers ;
+namespace frontend\controllers;
 
-use Yii ;
-use app\models\Mapping ;
-use yii\data\ActiveDataProvider ;
-use app\models\Product ;
-use yii\helpers\Json ;
-use yii\helpers\Url ;
-use yii\db\Query ;
-use yii\widgets\ActiveForm ;
-use yii\web\Response ;
-use app\models\Productnew ;
-use yii\filters\AccessControl ;
+use Yii;
+use app\models\Mapping;
+use yii\data\ActiveDataProvider;
+use app\models\Product;
+use yii\helpers\Json;
+use yii\helpers\Url;
+use yii\db\Query;
+use yii\widgets\ActiveForm;
+use yii\web\Response;
+use app\models\Productnew;
+use yii\filters\AccessControl;
 
 class ReceptionController extends \yii\web\Controller {
 
-    public function behaviors()
-    {
+    public function behaviors() {
         return [
             'access' => [
                 'class' => AccessControl::className(),
-                'only' => ['delete', 'export','getrefererencia','index','post-acum','view'],
+                'only' => ['delete', 'export', 'getrefererencia', 'index', 'post-acum', 'view', 'test','setcountref'],
                 'rules' => [
                     [
-                        'actions' => ['delete', 'export','getrefererencia','index','post-acum','view'],
+                        'actions' => ['delete', 'export', 'getrefererencia', 'index', 'post-acum', 'view', 'test','setcountref'],
                         'allow' => true,
                         'roles' => ['@'],
                     ],
                     [
-                        'actions' => ['delete', 'export','getrefererencia','index','post-acum','view'],
+                        'actions' => ['delete', 'export', 'getrefererencia', 'index', 'post-acum', 'view','setcountref'],
                         'allow' => false,
                         'roles' => ['?'],
                     ],
@@ -37,155 +36,194 @@ class ReceptionController extends \yii\web\Controller {
             ],
         ];
     }
+
     /**
      * 
      * @return type
      */
     public function actionIndex() {
         $dataProvider = new ActiveDataProvider([
-            'query' => Mapping::find() ,
-                ]) ;
+            'query' => Mapping::find(),
+        ]);
 
-        return $this->render('index' , [
+        return $this->render('index', [
                     'dataProvider' => $dataProvider
-                ]) ;
+        ]);
     }
 
     /**
      * 
      */
     public function actionView($id) {
-        $mapping = Mapping::find()->where(['id' => $id])->one() ;
-        $product = Product::find()->where(['id_mapping' => $id])->andWhere(['not' , ['acumulado' => null]])->all() ;
+        $mapping = Mapping::find()->where(['id' => $id])->one();
+        $product = Product::find()->where(['id_mapping' => $id])->andWhere(['not', ['acumulado' => null]])->all();
 
 
-        $newProduct  = new Productnew ;
-        $newProduct1 = new \app\models\Productexist ;
+        $newProduct = new Productnew;
+        $newProduct1 = new \app\models\Productexist;
 
-        $dataProveedor = $this->dataProveedor($mapping->marca , $id) ;
+        $dataProveedor = Yii::$app->gruduHelper->getDataProveedor($id);
 
-        $sumProduct  = Product::find()->where(['id_mapping' => $id])->sum('cantidad') ;
-        $acumProduct = Product::find()->where(['id_mapping' => $id])->sum('acumulado') ;
+        $sumProduct = Product::find()->where(['id_mapping' => $id])->sum('cantidad');
+        $acumProduct = Product::find()->where(['id_mapping' => $id])->sum('acumulado');
 
         if (Yii::$app->request->isAjax && $newProduct1->load(Yii::$app->request->post())) {
-            \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON ;
+            \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
 
-            $error = json_encode(ActiveForm::validate($newProduct1)) ;
+            $error = json_encode(ActiveForm::validate($newProduct1));
 
             if ($error != '[]') {
-                echo $error ;
-                \Yii::$app->end() ;
+                echo $error;
+                \Yii::$app->end();
             }
         }
 
         if (Yii::$app->request->isPost) {
-            $postnew   = Yii::$app->request->post('Productnew') ;
-            $postexist = Yii::$app->request->post('Productexist') ;
+            $postnew = Yii::$app->request->post('Productnew');
+            $postexist = Yii::$app->request->post('Productexist');
             if (isset($postnew)) {
-                $data = $this->setArrayPostProduct($postnew , $id) ;
+                $result = $this->setArrayPostProduct($postnew, $id);
+                $data   = $this->setReferenciaData($result);
+            } else {
+                $data = $this->setArrayPostProduct($postexist, $id);
             }
-            else {
-                $data = $this->setArrayPostProduct($postexist , $id) ;
-            }
-            $productnew             = new Product ;
-            $productnew->attributes = $data ;
+            $productnew = new Product;
+            $productnew->attributes = $data;
             if ($productnew->validate()) {
-                $productnew->save() ;
+                $productnew->save();
 
                 $param = [
-                    'operacion'   => 'Crear Producto' ,
-                    'id_mapping'  => $productnew['id_mapping'] ,
-                    'id_producto' => $productnew['id'] ,
-                    'acumulado'   => $productnew['acumulado'] ,
-                    'cantidad'    => $productnew['cantidad'] ,
-                        ] ;
-                Yii::$app->gruduHelper->setLog($param) ;
+                    'operacion' => 'Crear Producto',
+                    'id_mapping' => $productnew['id_mapping'],
+                    'id_producto' => $productnew['id'],
+                    'acumulado' => $productnew['acumulado'],
+                    'cantidad' => $productnew['cantidad'],
+                ];
+                Yii::$app->gruduHelper->setLog($param);
 
-                return $this->redirect(Url::to(['/reception/view' , 'id' => $id])) ;
+                return $this->redirect(Url::to(['/reception/view', 'id' => $id]));
             }
         }
 
 
-        return $this->render('view' , [
-                    'product'       => $product ,
-                    'mapping'       => $mapping ,
-                    'sumProduct'    => $sumProduct ,
-                    'acumProduct'   => $acumProduct ,
-                    'newProduct'    => $newProduct ,
-                    'newProduct1'   => $newProduct1 ,
-                    'dataProveedor' => $dataProveedor ,
-                ]) ;
+        return $this->render('view', [
+                    'product' => $product,
+                    'mapping' => $mapping,
+                    'sumProduct' => $sumProduct,
+                    'acumProduct' => $acumProduct,
+                    'newProduct' => $newProduct,
+                    'newProduct1' => $newProduct1,
+                    'dataProveedor' => $dataProveedor,
+        ]);
     }
 
-    public function validateCodBarra($codBarra) {
+    public function setReferenciaData($result) {
+        $marca        = substr($result['marca'], 0, 1) ;
+        $temporada    = $result['codtemporada'] ;
+        $ano          = $result['codano'] ;
+        $capsula      = $result['codcapsula'] ;
+        $departamento = $result['coddepto'] ;
+        $seccion      = $result['codseccion'] ;
+        $familia      = $result['codfamilia'] ;
+        $subfamilia   =  str_pad((int)$result['codsubfamilia'],3,0,STR_PAD_LEFT) ;
         
+        $result['referencia'] = $marca.$temporada.$ano.$capsula.'-'.$departamento.$seccion.$familia.'-'.$subfamilia ;
+        return $result;
     }
-
+    
+    public function actionSetcountref() {
+        $post = Yii::$app->request->post() ;
+        $id   = $post['id'];
+        unset($post['id']);
+        unset($post['cod_barra']);
+        unset($post['_csrf-frontend']);
+        foreach ($post as $cod_barra => $cantidad) {
+            $product = Product::find()->where(['cod_barra' => $cod_barra])->one();
+            $acumProduct = $product['acumulado'];
+            if (is_null($acumProduct)) {
+                $acumProduct = 0;
+            }
+            $newAcumProduct = $acumProduct + $cantidad;
+            Yii::$app->db->createCommand()->update('product', ['acumulado' => $newAcumProduct], ['cod_barra' => $cod_barra])->execute();
+            
+            $product = Product::find()->where(['cod_barra' => $cod_barra])->one();
+            $param = [
+                'operacion' => 'Conteo',
+                'id_mapping' => $product['id_mapping'],
+                'id_producto' => $product['id'],
+                'acumulado' => $product['acumulado'],
+                'cantidad' => $product['cantidad'],
+            ];
+            Yii::$app->gruduHelper->setLog($param);
+        }
+        return $this->redirect(Url::to(['/reception/view', 'id' => $id]));
+    }
     /**
      * 
      * @param type $post
      */
-    public function setArrayPostProduct($post , $idMapping) {
-        $departamento = explode('-' , $post['departamento']) ;
-        $familia      = explode('-' , $post['familia']) ;
-        $temporada    = explode('-' , $post['temporada']) ;
-        $capsula      = explode('-' , $post['capsula']) ;
-        $talla        = explode('-' , $post['talla']) ;
-        $seccion      = explode('-' , $post['seccion']) ;
-        $ano          = explode('-' , $post['ano']) ;
-        $color        = explode('-' , $post['color']) ;
-        $proveedor    = explode('-' , $post['proveedor']) ;
+    public function setArrayPostProduct($post, $idMapping) {
+        $data['cod_barra'] = $post['cod_barra'] ;
+        $data['marca']     = $post['marca'] ;
 
-        $data['cod_barra']     = $post['cod_barra'] ;
-        $data['marca']         = $post['marca'] ;
-        $data['departamento']  = $departamento[0] ;
-        $data['coddepto']      = $departamento[1] ;
-        $data['seccion']       = $seccion[0] ;
-        $data['codseccion']    = $seccion[1] ;
-        $data['familia']       = $familia[0] ;
-        $data['codfamilia']    = $familia[1] ;
+        $data['coddepto']     = $post['departamento'] ;
+        $data['departamento'] = Yii::$app->gruduHelper->getDepartamento($data['coddepto']) ;
+
+        $data['codseccion'] = $post['seccion'] ;
+        $data['seccion']    = Yii::$app->gruduHelper->getSeccion($data['codseccion']) ;
+
+        $familia            = explode('-', $post['familia']) ;
+        $data['codfamilia'] = $familia[1] ;
+        $data['familia']    = $familia[0] ;
+
         $data['subfamilia']    = $post['subfamilia'] ;
         $data['codsubfamilia'] = $post['subfamilia'] ;
-        $data['temporada']     = $temporada[0] ;
-        $data['codtemporada']  = $temporada[1] ;
-        $data['ano']           = $ano[0] ;
-        $data['codano']        = $ano[1] ;
-        $data['capsula']       = $capsula[0] ;
-        $data['codcapsula']    = $capsula[1] ;
-        $data['color']         = $color[0] ;
-        $data['codcolor']      = $color[1] ;
-        $data['talla']         = $talla[0] ;
-        $data['codtalla']      = $talla[1] ;
-        $data['proveedor']     = $proveedor[0] ;
-        $data['codprov']       = $proveedor[1] ;
-        $data['cantidad']      = ($post['cantidad']) ? $post['cantidad'] : "" ;
-        $data['referencia']    = ($post['referencia']) ? $post['referencia'] : '' ;
-        $data['descripcion']   = $post['descripcion'] ;
-        $data['carac']         = $post['carac'] ;
-        $data['id_mapping']    = $post['id_mapping'] ;
-        $data['acumulado']     = 1 ;
 
-        return $data ;
+        $data['codtemporada'] = $post['temporada'] ;
+        $data['temporada']    = Yii::$app->gruduHelper->getTemporada($data['codtemporada']) ;
+        
+        $data['codano']       = $post['ano'] ;
+        $data['ano']          = Yii::$app->gruduHelper->getAno($data['codano']) ;
+        
+        $data['codcapsula'] = Yii::$app->gruduHelper->getCapsulaCod($post['capsula']) ;
+        $data['capsula']    = Yii::$app->gruduHelper->getCapsula($post['capsula']) ;
+        
+        $data['codcolor'] = $post['color'] ;
+        $data['color']    = Yii::$app->gruduHelper->getColor($data['codcolor']) ;
+        
+        $data['codtalla'] = Yii::$app->gruduHelper->getTallaCod($post['talla']) ;
+        $data['talla']    = Yii::$app->gruduHelper->getTalla($post['talla']) ;
+        
+        $data['codprov']   = $post['proveedor'] ;
+        $data['proveedor'] = Yii::$app->gruduHelper->getProveedor($post['proveedor']) ;
+
+        $data['cantidad'] = ($post['cantidad']) ? $post['cantidad'] : "";
+        $data['referencia'] = isset($post['referencia']) ? $post['referencia'] : '';
+        $data['descripcion'] = $post['descripcion'];
+        $data['carac'] = $post['carac'];
+        $data['id_mapping'] = $post['id_mapping'];
+        $data['acumulado'] = 1;
+
+        return $data;
     }
 
     public function actionGetreferencia($q) {
-        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON ;
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
         if (!is_null($q)) {
-            $query          = new Query ;
+            $query = new Query;
             $query->select('referencia AS id, referencia AS text')
                     ->from('product')
-                    ->where(['like' , 'referencia' , $q])
-                    ->distinct() ;
-            $command        = $query->createCommand() ;
-            $data           = $command->queryAll() ;
-            $out['results'] = array_values($data) ;
-        }
-        elseif ($id > 0) {
-            $out['results'] = ['id' => Product::find()->referencia , 'text' => Product::find()->referencia] ;
+                    ->where(['like', 'referencia', $q])
+                    ->distinct();
+            $command = $query->createCommand();
+            $data = $command->queryAll();
+            $out['results'] = array_values($data);
+        } elseif ($id > 0) {
+            $out['results'] = ['id' => Product::find()->referencia, 'text' => Product::find()->referencia];
         }
 
 
-        return $out ;
+        return $out;
     }
 
     /**
@@ -197,1450 +235,175 @@ class ReceptionController extends \yii\web\Controller {
         Yii::$app
                 ->db
                 ->createCommand()
-                ->delete('product' , ['id_mapping' => $id])
-                ->execute() ;
+                ->delete('product', ['id_mapping' => $id])
+                ->execute();
 
         Yii::$app
                 ->db
                 ->createCommand()
-                ->delete('mapping' , ['id' => $id])
-                ->execute() ;
+                ->delete('mapping', ['id' => $id])
+                ->execute();
 
         $dataProvider = new ActiveDataProvider([
-            'query' => Mapping::find() ,
-                ]) ;
+            'query' => Mapping::find(),
+        ]);
 
-        return $this->render('index' , [
+        return $this->render('index', [
                     'dataProvider' => $dataProvider
-                ]) ;
+        ]);
     }
 
     /**
      * Metodo que se usa para traer producto en ajax
-     * @return boolean
+     * @return booleancom
      */
     public function actionGetreferenciaajax() {
-        $q = Yii::$app->request->post('ref') ;
+        $q = Yii::$app->request->post('ref');
         if (!is_null($q)) {
-            $product                = Product::find()->where(['referencia' => $q])->one() ;
-            $result['departamento'] = $product['departamento'] . '-' . $product['coddepto'] ;
-            $result['seccion']      = $product['seccion'] . '-' . $product['codseccion'] ;
-            $result['familia']      = $product['familia'] . '-' . $product['codfamilia'] ;
-            $result['temporada']    = $product['temporada'] . '-' . $product['codtemporada'] ;
-            $result['ano']          = $product['ano'] . '-' . $product['codano'] ;
-            $result['capsula']      = $product['capsula'] . '-' . $product['codcapsula'] ;
-            $result['proveedor']    = $product['proveedor'] . '-' . $product['codprov'] ;
-            $result['descapsula']   = $product['descapsula'] ;
-            $result['carac']        = $product['carac'] ;
-            $result['descripcion']  = $product['descripcion'] ;
-            $result['subfamilia']   = $product['subfamilia'] ;
-            return Json::encode($result) ;
+            $product = Product::find()->where(['referencia' => $q])->one();
+            
+            $result['departamento'] = $product['coddepto'];
+            $result['seccion'] = $product['codseccion'];
+            $result['familia'] = $product['familia'] . '-' .str_pad((int)$product['codfamilia'],2,0,STR_PAD_LEFT) ;
+            $result['temporada'] =  $product['codtemporada'];
+            $result['ano'] = $product['codano'];
+            $result['capsula'] = $product['codcapsula'];
+            $result['proveedor'] =  $product['codprov'];
+            $result['descapsula'] = $product['descapsula'];
+            $result['carac'] = $product['carac'];
+            $result['descripcion'] = $product['descripcion'];
+            $result['subfamilia'] = $product['subfamilia'];
+            return Json::encode($result);
         }
-        return false ;
+        return false;
     }
 
     /**
-     * 
+     * Metodo utilizado para conteo ajax
      * @return int
      */
     public function actionPostAcum() {
-        $cod_barra = $_POST['cod_barra'] ;
-        $product   = Product::find()->where(['cod_barra' => $cod_barra])->one() ;
+        $cod_barra = $_POST['cod_barra'];
+        $product = Product::find()->where(['cod_barra' => $cod_barra])->one();
         if ($product) {
-            $acumProduct  = $product['acumulado'] ;
-            $countProduct = $product['cantidad'] ;
-            if ($acumProduct < $countProduct) {
-                if (is_null($acumProduct)) {
-                    $acumProduct = 0 ;
-                }
-                $newAcumProduct = $acumProduct + 1 ;
-                Yii::$app->db->createCommand()->update('product' , ['acumulado' => $newAcumProduct] , ['cod_barra' => $cod_barra])->execute() ;
-                $product        = Product::find()->where(['cod_barra' => $cod_barra])->one() ;
-                $param          = [
-                    'operacion'   => 'Conteo' ,
-                    'id_mapping'  => $product['id_mapping'] ,
-                    'id_producto' => $product['id'] ,
-                    'acumulado'   => $product['acumulado'] ,
-                    'cantidad'    => $product['cantidad'] ,
-                        ] ;
-                Yii::$app->gruduHelper->setLog($param) ;
+            $acumProduct = $product['acumulado'];
+            $countProduct = $product['cantidad'];
+            if (is_null($acumProduct)) {
+                $acumProduct = 0;
             }
-            else {
-                return 1 ;
-            }
+            $newAcumProduct = $acumProduct + 1;
+            Yii::$app->db->createCommand()->update('product', ['acumulado' => $newAcumProduct], ['cod_barra' => $cod_barra])->execute();
+            $product = Product::find()->where(['cod_barra' => $cod_barra])->one();
+            $param = [
+                'operacion' => 'Conteo',
+                'id_mapping' => $product['id_mapping'],
+                'id_producto' => $product['id'],
+                'acumulado' => $product['acumulado'],
+                'cantidad' => $product['cantidad'],
+            ];
+            Yii::$app->gruduHelper->setLog($param);
 
             $result = [
-                'cod_barra' => $cod_barra ,
-                'ref'       => $product['referencia'] ,
-                'talla'     => $product['talla'] ,
-                'color'     => $product['color'] ,
-                'cant'      => $countProduct ,
-                'acum'      => $newAcumProduct ,
-                    ] ;
+                'cod_barra' => $cod_barra,
+                'ref' => $product['referencia'],
+                'talla' => $product['talla'],
+                'color' => $product['color'],
+                'cant' => $countProduct,
+                'acum' => $newAcumProduct,
+            ];
 
+            //Si encuentra cod_barra
+            return Json::encode($result);
+        } else {
+            $product = Product::find()->where(['referencia' => $cod_barra])->all();
+            
+            if ($product) {
+                foreach ($product as $key => $value) {
+                    $result[] = [
+                        'cod_barra' => $value->cod_barra,
+                        'ref' => $value->referencia,
+                        'talla' => $value->talla,
+                        'color' => $value->color,
+                        'cant' => $value->cantidad,
+                        'acum' => $value->acumulado,
+                        'referencia' => 1,
+                    ];
+                }
+                //si encuentra referencia aún no se cuenta
+                return Json::encode($result);
+            }
+        }
+        // Si no encuentra nada
+        return 0;
+    }
 
-            return Json::encode($result) ;
+    public function actionTest() {
+        $product = Product::find()->where(['referencia' => 'AU171-1103-001'])->all();
+
+        foreach ($product as $key => $value) {
+            $result[] = [
+                'cod_barra' => $value->cod_barra,
+                'ref' => $value->referencia,
+                'talla' => $value->talla,
+                'color' => $value->color,
+                'cant' => $value->cantidad,
+                'acum' => $value->acumulado,
+            ];
         }
-        else {
-            return 0 ;
-        }
+        print_r($result);
+        exit;
     }
 
     public function actionExport($id) {
-        $mapping = Mapping::findOne($id) ;
-        $file    = \Yii::createObject([
-                    'class'  => 'codemix\excelexport\ExcelFile' ,
+        $mapping = Mapping::findOne($id);
+        $file = \Yii::createObject([
+                    'class' => 'codemix\excelexport\ExcelFile',
                     'sheets' => [
                         'MAPPING' => [
-                            'class'      => 'codemix\excelexport\ActiveExcelSheet' ,
-                            'query'      => Product::find()->where(['id_mapping' => $id]) ,
+                            'class' => 'codemix\excelexport\ActiveExcelSheet',
+                            'query' => Product::find()->where(['id_mapping' => $id]),
                             'attributes' => [
-                                'cod_barra' ,
-                                'marca' ,
-                                'departamento' ,
-                                'seccion' ,
-                                'familia' ,
-                                'subfamilia' ,
-                                'temporada' ,
-                                'ano' ,
-                                'capsula' ,
-                                'color' ,
-                                'talla' ,
-                                'proveedor' ,
-                                'cantidad' ,
-                                'pvptienda' ,
-                                'peso' ,
-                                'serie' ,
-                                'referencia' ,
-                                'descripcion' ,
-                                'costodist' ,
-                                'pvpmgta' ,
-                                'carac' ,
-                                'gpeso' ,
-                                'codmarca' ,
-                                'coddepto' ,
-                                'codseccion' ,
-                                'codfamilia' ,
-                                'codsubfamilia' ,
-                                'codtemporada' ,
-                                'codano' ,
-                                'codcapsula' ,
-                                'codcolor' ,
-                                'codtalla' ,
-                                'codprov' ,
-                                'descapsula' ,
+                                'cod_barra',
+                                'marca',
+                                'departamento',
+                                'seccion',
+                                'familia',
+                                'subfamilia',
+                                'temporada',
+                                'ano',
+                                'capsula',
+                                'color',
+                                'talla',
+                                'proveedor',
+                                'cantidad',
+                                'pvptienda',
+                                'peso',
+                                'serie',
+                                'referencia',
+                                'descripcion',
+                                'costodist',
+                                'pvpmgta',
+                                'carac',
+                                'gpeso',
+                                'codmarca',
+                                'coddepto',
+                                'codseccion',
+                                'codfamilia',
+                                'codsubfamilia',
+                                'codtemporada',
+                                'codano',
+                                'codcapsula',
+                                'codcolor',
+                                'codtalla',
+                                'codprov',
+                                'descapsula',
                                 'acumulado'
-                            ] ,
+                            ],
                         ]
                     ]
-        ]) ;
-        $file->send(substr($mapping->archivo , 0 , -4) . '.xlsx') ;
+        ]);
+        $file->send(substr($mapping->archivo, 0, -4) . '.xlsx');
     }
 
-    /**
-     * 
-     * @return type
-     */
-    public function dataProveedor($id) {
-        switch ($id) {
-            case 'Aishop':
-                $data = [
-                    ['text' => 'GRUPO DUMIT ALMACEN PRINCIPAL' ,
-                        'id'   => 'GRUPO DUMIT ALMACEN PRINCIPAL-1'] ,
-                    ['text' => 'SHEET1' ,
-                        'id'   => 'SHEET1-4'] ,
-                    ['text' => 'MONACO' ,
-                        'id'   => 'MONACO-5'] ,
-                    ['text' => 'PLUFT DISE—OS S.Y.R.C.A' ,
-                        'id'   => 'PLUFT DISE—OS S.Y.R.C.A-6'] ,
-                    ['text' => 'TELAS ORENSE, C.A.' ,
-                        'id'   => 'TELAS ORENSE, C.A.-7'] ,
-                    ['text' => 'Inversiones Noa Caracas, C.A.' ,
-                        'id'   => 'Inversiones Noa Caracas, C.A.-8'] ,
-                    ['text' => 'Manufacturas Escolches, C.A.' ,
-                        'id'   => 'Manufacturas Escolches, C.A.-9'] ,
-                    ['text' => 'INVERSIONES 20771,CA.' ,
-                        'id'   => 'INVERSIONES 20771,CA.-10'] ,
-                    ['text' => 'CONSTRUCTORA SAMBIL , C.A.' ,
-                        'id'   => 'CONSTRUCTORA SAMBIL , C.A.-12'] ,
-                    ['text' => 'ASESORIA Y ADMINISTRACION INTEGRAL A.R.P.C., C.A.' ,
-                        'id'   => 'ASESORIA Y ADMINISTRACION INTEGRAL A.R.P.C., C.A.-13'] ,
-                    ['text' => 'PLASTICOS FLEXI C.A.' ,
-                        'id'   => 'PLASTICOS FLEXI C.A.-14'] ,
-                    ['text' => 'CORPORACION IMPACTO VISUAL' ,
-                        'id'   => 'CORPORACION IMPACTO VISUAL-15'] ,
-                    ['text' => 'FLETEROS LA LUZ C.A' ,
-                        'id'   => 'FLETEROS LA LUZ C.A-16'] ,
-                    ['text' => 'Servicios' ,
-                        'id'   => 'Servicios-17'] ,
-                    ['text' => 'PERFECT IMAGE LLC' ,
-                        'id'   => 'PERFECT IMAGE LLC-18'] ,
-                    ['text' => 'DESARROLLOS EXTRADOS, C.A.' ,
-                        'id'   => 'DESARROLLOS EXTRADOS, C.A.-19'] ,
-                    ['text' => 'CONSULTORES EN COMUNICACIONES CARONI, C.A.' ,
-                        'id'   => 'CONSULTORES EN COMUNICACIONES CARONI, C.A.-20'] ,
-                    ['text' => 'INMUEBLES CCB1, C.A.' ,
-                        'id'   => 'INMUEBLES CCB1, C.A.-21'] ,
-                    ['text' => 'INVERSIONES NOA TOLON C.A' ,
-                        'id'   => 'INVERSIONES NOA TOLON C.A-22'] ,
-                    ['text' => 'OPERADORA CENTRO COMERCIAL TOLON, C.A.' ,
-                        'id'   => 'OPERADORA CENTRO COMERCIAL TOLON, C.A.-23'] ,
-                    ['text' => 'MAQUINFOIL SUPPLY, C.A.' ,
-                        'id'   => 'MAQUINFOIL SUPPLY, C.A.-24'] ,
-                    ['text' => 'ADVANCED POS TECHNOLOGY' ,
-                        'id'   => 'ADVANCED POS TECHNOLOGY-25'] ,
-                    ['text' => 'SPAZIO MOBILI, C.A.' ,
-                        'id'   => 'SPAZIO MOBILI, C.A.-26'] ,
-                    ['text' => 'MUAA' ,
-                        'id'   => 'MUAA-27'] ,
-                    ['text' => 'SASHA' ,
-                        'id'   => 'SASHA-28'] ,
-                    ['text' => 'LYDIA APPAREL' ,
-                        'id'   => 'LYDIA APPAREL-29'] ,
-                    ['text' => 'MOA' ,
-                        'id'   => 'MOA-30'] ,
-                    ['text' => 'SIN FACTURA' ,
-                        'id'   => 'SIN FACTURA-31'] ,
-                    ['text' => 'COLOR STORY' ,
-                        'id'   => 'COLOR STORY-32'] ,
-                    ['text' => 'SANTOORI INC.' ,
-                        'id'   => 'SANTOORI INC.-33'] ,
-                    ['text' => 'Inversiones Yudo 2000, C.A.' ,
-                        'id'   => 'Inversiones Yudo 2000, C.A.-34'] ,
-                    ['text' => 'Manofacturas 2005 XL, C.A' ,
-                        'id'   => 'Manofacturas 2005 XL, C.A-35'] ,
-                    ['text' => 'JANICE' ,
-                        'id'   => 'JANICE-36'] ,
-                    ['text' => 'TAMA' ,
-                        'id'   => 'TAMA-37'] ,
-                    ['text' => 'CL BY CELLO' ,
-                        'id'   => 'CL BY CELLO-38'] ,
-                    ['text' => 'JUST ME' ,
-                        'id'   => 'JUST ME-39'] ,
-                    ['text' => 'KRAFTY' ,
-                        'id'   => 'KRAFTY-40'] ,
-                    ['text' => 'Importadora Orimar, C.A' ,
-                        'id'   => 'Importadora Orimar, C.A-41'] ,
-                    ['text' => 'Inversiones Clarisa,C.A' ,
-                        'id'   => 'Inversiones Clarisa,C.A-42'] ,
-                    ['text' => 'Manufacturas Urimare, C.A.' ,
-                        'id'   => 'Manufacturas Urimare, C.A.-43'] ,
-                    ['text' => '(Dev) Inversiones Monofacturas Perdomo, c. a.' ,
-                        'id'   => '(Dev) Inversiones Monofacturas Perdomo, c. a.-50'] ,
-                    ['text' => '(Dev) Inversiones Yudo 2000, C.A. ' ,
-                        'id'   => '(Dev) Inversiones Yudo 2000, C.A. -51'] ,
-                    ['text' => '(Dev) Manofacturas 2005 XL, C.A' ,
-                        'id'   => '(Dev) Manofacturas 2005 XL, C.A-52'] ,
-                    ['text' => '(Dev) Importadora Orimar ' ,
-                        'id'   => '(Dev) Importadora Orimar -53'] ,
-                    ['text' => '(Dev) Inversiones Clarisa,C.A' ,
-                        'id'   => '(Dev) Inversiones Clarisa,C.A-54'] ,
-                    ['text' => '(Dev) Manufacturas Urimare, C.A' ,
-                        'id'   => '(Dev) Manufacturas Urimare, C.A-55'] ,
-                    ['text' => 'SISVEN SEGURIDAD' ,
-                        'id'   => 'SISVEN SEGURIDAD-127'] ,
-                    ['text' => 'PAT PRIMO VENEZUELA,C.A.' ,
-                        'id'   => 'PAT PRIMO VENEZUELA,C.A.-301'] ,
-                    ['text' => 'INVERSIONES VENEBLUE C.A.' ,
-                        'id'   => 'INVERSIONES VENEBLUE C.A.-307'] ,
-                    ['text' => 'INVERSIONES TANURIN C.A' ,
-                        'id'   => 'INVERSIONES TANURIN C.A-308'] ,
-                    ['text' => 'BANCO MERCANTIL' ,
-                        'id'   => 'BANCO MERCANTIL-309'] ,
-                    ['text' => 'ASESORIA Y ADMINISTRACION INTEGRAL A.R.I.E., .C.A' ,
-                        'id'   => 'ASESORIA Y ADMINISTRACION INTEGRAL A.R.I.E., .C.A-310'] ,
-                    ['text' => 'ADMINISTRADORA SERDECO, C.A.' ,
-                        'id'   => 'ADMINISTRADORA SERDECO, C.A.-311'] ,
-                    ['text' => 'C.A.N.T.V.' ,
-                        'id'   => 'C.A.N.T.V.-312'] ,
-                    ['text' => 'PC CHIPS COMPUTERS SYSTEMS, C.A.' ,
-                        'id'   => 'PC CHIPS COMPUTERS SYSTEMS, C.A.-313'] ,
-                    ['text' => 'FERRETERIA EPA, C.A.' ,
-                        'id'   => 'FERRETERIA EPA, C.A.-314'] ,
-                    ['text' => 'ALFOMBRAS DASHER, C.A.' ,
-                        'id'   => 'ALFOMBRAS DASHER, C.A.-315'] ,
-                    ['text' => 'SECURITY SISTEMS EXCELON  C.A.' ,
-                        'id'   => 'SECURITY SISTEMS EXCELON  C.A.-316'] ,
-                    ['text' => 'IMPRESOS CANAIMA, S.R.L.' ,
-                        'id'   => 'IMPRESOS CANAIMA, S.R.L.-317'] ,
-                    ['text' => 'CEDRO & NOGAL MUEBLES' ,
-                        'id'   => 'CEDRO & NOGAL MUEBLES-318'] ,
-                    ['text' => 'IMPRESORA QUALITY PRINT S.A.' ,
-                        'id'   => 'IMPRESORA QUALITY PRINT S.A.-319'] ,
-                    ['text' => 'PARAGON, C.A.' ,
-                        'id'   => 'PARAGON, C.A.-320'] ,
-                    ['text' => 'INVERSIONES COMPU MALL, C.A.' ,
-                        'id'   => 'INVERSIONES COMPU MALL, C.A.-321'] ,
-                    ['text' => 'ABELEC S.A.' ,
-                        'id'   => 'ABELEC S.A.-322'] ,
-                    ['text' => 'H & O EDICIONES, C.A.' ,
-                        'id'   => 'H & O EDICIONES, C.A.-323'] ,
-                    ['text' => 'AGENCIA DE VIAJES Y TURISMO PASSARINI-SUAREZ, C.A.' ,
-                        'id'   => 'AGENCIA DE VIAJES Y TURISMO PASSARINI-SUAREZ, C.A.-324'] ,
-                    ['text' => 'EXTINTORES SERVI CENTER 2020, C.A.' ,
-                        'id'   => 'EXTINTORES SERVI CENTER 2020, C.A.-325'] ,
-                    ['text' => 'FERRETERIA SAN ANDRES' ,
-                        'id'   => 'FERRETERIA SAN ANDRES-326'] ,
-                    ['text' => 'FORMALUX  C.A..' ,
-                        'id'   => 'FORMALUX  C.A..-327'] ,
-                    ['text' => 'DECO TEJIDOS' ,
-                        'id'   => 'DECO TEJIDOS-328'] ,
-                    ['text' => 'CORPORACION H. LIGHTS S.A.' ,
-                        'id'   => 'CORPORACION H. LIGHTS S.A.-329'] ,
-                    ['text' => 'INVERSIONES ROMACHACAO 2004, C.A.' ,
-                        'id'   => 'INVERSIONES ROMACHACAO 2004, C.A.-330'] ,
-                    ['text' => 'ALMACENES TOLEDO SAMBIL C.A.' ,
-                        'id'   => 'ALMACENES TOLEDO SAMBIL C.A.-331'] ,
-                    ['text' => 'OTAI DESIGN' ,
-                        'id'   => 'OTAI DESIGN-332'] ,
-                    ['text' => 'REFRIGERACION NEVE-AIRE, C.A.' ,
-                        'id'   => 'REFRIGERACION NEVE-AIRE, C.A.-333'] ,
-                    ['text' => 'HOGAR DE MADERA Y ALGO MAS, C.A.' ,
-                        'id'   => 'HOGAR DE MADERA Y ALGO MAS, C.A.-335'] ,
-                    ['text' => 'SERVICIOS MULTINORTE, C.A.' ,
-                        'id'   => 'SERVICIOS MULTINORTE, C.A.-336'] ,
-                    ['text' => 'FERRETOTAL CARACAS, C.A.' ,
-                        'id'   => 'FERRETOTAL CARACAS, C.A.-337'] ,
-                    ['text' => 'INVERSIONES ALCRIS 2.057, C.A.' ,
-                        'id'   => 'INVERSIONES ALCRIS 2.057, C.A.-338'] ,
-                    ['text' => 'BANCO BANESCO' ,
-                        'id'   => 'BANCO BANESCO-339'] ,
-                    ['text' => 'TODO INDUSTRIA Y COMERCIO DEL MUEBLES, C.A.' ,
-                        'id'   => 'TODO INDUSTRIA Y COMERCIO DEL MUEBLES, C.A.-340'] ,
-                    ['text' => 'FORMALUX, C.A.' ,
-                        'id'   => 'FORMALUX, C.A.-341'] ,
-                    ['text' => 'TECHTROL SISTEMAS ELECTRONICOS C.A.' ,
-                        'id'   => 'TECHTROL SISTEMAS ELECTRONICOS C.A.-342'] ,
-                    ['text' => 'INVERSIONES MADEACERO, C.A.' ,
-                        'id'   => 'INVERSIONES MADEACERO, C.A.-343'] ,
-                    ['text' => 'U 21 CASA DE BOLSA C.A.' ,
-                        'id'   => 'U 21 CASA DE BOLSA C.A.-351'] ,
-                    ['text' => 'LASER SONIC 52 T.V. VIDEO, C.A.' ,
-                        'id'   => 'LASER SONIC 52 T.V. VIDEO, C.A.-352'] ,
-                    ['text' => 'LA BOUTIQUE DEL MANIQUI, C.A.' ,
-                        'id'   => 'LA BOUTIQUE DEL MANIQUI, C.A.-353'] ,
-                    ['text' => 'CONSTRACTA, C.A.' ,
-                        'id'   => 'CONSTRACTA, C.A.-354'] ,
-                    ['text' => 'IMIL 2000 AIRE ACONDICIONADO, C.A.' ,
-                        'id'   => 'IMIL 2000 AIRE ACONDICIONADO, C.A.-355'] ,
-                    ['text' => 'SERVICIOS MULTINORTE, C.A.' ,
-                        'id'   => 'SERVICIOS MULTINORTE, C.A.-356'] ,
-                    ['text' => 'DESARROLLOS ORINOKIA 2004 C.A.' ,
-                        'id'   => 'DESARROLLOS ORINOKIA 2004 C.A.-357'] ,
-                    ['text' => 'INVERSIONES ORIANA, C.A.' ,
-                        'id'   => 'INVERSIONES ORIANA, C.A.-358'] ,
-                    ['text' => 'Inversiones Monofacturas Perdomo, c. a.' ,
-                        'id'   => 'Inversiones Monofacturas Perdomo, c. a.-359'] ,
-                    ['text' => 'ASESORES VALVER, C.A.' ,
-                        'id'   => 'ASESORES VALVER, C.A.-360'] ,
-                    ['text' => 'ZOOM INTERNATIONAL SERVICES C.A.' ,
-                        'id'   => 'ZOOM INTERNATIONAL SERVICES C.A.-361'] ,
-                    ['text' => 'MATERIALES CARABOBO C.A.' ,
-                        'id'   => 'MATERIALES CARABOBO C.A.-363'] ,
-                    ['text' => 'CONSTRUCCIONES EDMOSO, C.A.' ,
-                        'id'   => 'CONSTRUCCIONES EDMOSO, C.A.-364'] ,
-                    ['text' => 'PUBLICIDAD GLOBORAMA C.A.' ,
-                        'id'   => 'PUBLICIDAD GLOBORAMA C.A.-481'] ,
-                    ['text' => 'FUMIGACIONES M  Y A, C.A.' ,
-                        'id'   => 'FUMIGACIONES M  Y A, C.A.-482'] ,
-                    ['text' => 'INVERSIONES NGG, C.A.' ,
-                        'id'   => 'INVERSIONES NGG, C.A.-483'] ,
-                    ['text' => "ANITA'S DISE—OS 2004 C.A." ,
-                        'id'   => "ANITA'S DISE—OS 2004 C.A.-484"] ,
-                    ['text' => 'PABLOELECTRONICA C.A.' ,
-                        'id'   => 'PABLOELECTRONICA C.A.-485'] ,
-                    ['text' => 'INVERSIONES SCARLET, C. A.' ,
-                        'id'   => 'INVERSIONES SCARLET, C. A.-486'] ,
-                    ['text' => 'INVERSIONES GRAVANTE & ASOCIADOS  C.A.' ,
-                        'id'   => 'INVERSIONES GRAVANTE & ASOCIADOS  C.A.-487'] ,
-                    ['text' => 'HOTEL DOS RIOS' ,
-                        'id'   => 'HOTEL DOS RIOS-488'] ,
-                    ['text' => 'CERVECERIA Y RESTAURANT EL BIGOTE DEL ABUELO, C.A.' ,
-                        'id'   => 'CERVECERIA Y RESTAURANT EL BIGOTE DEL ABUELO, C.A.-489'] ,
-                    ['text' => 'PINTAORIENTE C.A.' ,
-                        'id'   => 'PINTAORIENTE C.A.-490'] ,
-                    ['text' => 'IMAYA C.A.' ,
-                        'id'   => 'IMAYA C.A.-491'] ,
-                    ['text' => "ARTURO'S SANTO TOMES" ,
-                        'id'   => "ARTURO'S SANTO TOMES-492"] ,
-                    ['text' => 'ELECTRICOS ALTA VISTA, C.A.' ,
-                        'id'   => 'ELECTRICOS ALTA VISTA, C.A.-493'] ,
-                    ['text' => 'DRY WALL C.A.' ,
-                        'id'   => 'DRY WALL C.A.-494'] ,
-                    ['text' => 'MATERIALES REYFECA, C.A.' ,
-                        'id'   => 'MATERIALES REYFECA, C.A.-495'] ,
-                    ['text' => 'LA FERIA DE LA PINTURA UNARE, C .A' ,
-                        'id'   => 'LA FERIA DE LA PINTURA UNARE, C .A-496'] ,
-                    ['text' => 'RESTAURANT INVERSIONES VALFA 14 C.A.' ,
-                        'id'   => 'RESTAURANT INVERSIONES VALFA 14 C.A.-497'] ,
-                    ['text' => 'INVERSIONES KILO ORINOKIA, C.A.' ,
-                        'id'   => 'INVERSIONES KILO ORINOKIA, C.A.-498'] ,
-                    ['text' => 'PAPELERIA LATINA ORIENTE C.A.' ,
-                        'id'   => 'PAPELERIA LATINA ORIENTE C.A.-499'] ,
-                    ['text' => 'BINGO CACHAMAY, C.A.' ,
-                        'id'   => 'BINGO CACHAMAY, C.A.-500'] ,
-                    ['text' => 'DISTRIBUIDORA CAMI C.A.' ,
-                        'id'   => 'DISTRIBUIDORA CAMI C.A.-501'] ,
-                    ['text' => 'CENTRAL SANTO TOME IV, C.A.' ,
-                        'id'   => 'CENTRAL SANTO TOME IV, C.A.-502'] ,
-                    ['text' => 'PRODUCTOS Y SERVICIOS REYES' ,
-                        'id'   => 'PRODUCTOS Y SERVICIOS REYES-503'] ,
-                    ['text' => 'H Y F CIUDAD GUAYANA S.A.' ,
-                        'id'   => 'H Y F CIUDAD GUAYANA S.A.-504'] ,
-                    ['text' => 'LAMPARAS DORAL PUERTO ORDAZ C.A.' ,
-                        'id'   => 'LAMPARAS DORAL PUERTO ORDAZ C.A.-505'] ,
-                    ['text' => 'STEFIS, C.A.' ,
-                        'id'   => 'STEFIS, C.A.-506'] ,
-                    ['text' => 'INVERSIONES BAYTOR -2000 C.A.' ,
-                        'id'   => 'INVERSIONES BAYTOR -2000 C.A.-507'] ,
-                    ['text' => 'ELECTRODOMESTICOS JVG HOGAR C.A.' ,
-                        'id'   => 'ELECTRODOMESTICOS JVG HOGAR C.A.-508'] ,
-                    ['text' => 'LIBRERIA LATINA ORINOKIA C.A.' ,
-                        'id'   => 'LIBRERIA LATINA ORINOKIA C.A.-509'] ,
-                    ['text' => 'AIR MUNDO' ,
-                        'id'   => 'AIR MUNDO-510'] ,
-                    ['text' => 'MARINICOL & ASOCIADOS, C.A.' ,
-                        'id'   => 'MARINICOL & ASOCIADOS, C.A.-511'] ,
-                    ['text' => 'DISGRECA C.A.' ,
-                        'id'   => 'DISGRECA C.A.-512'] ,
-                    ['text' => 'MUST HAVE' ,
-                        'id'   => 'MUST HAVE-513'] ,
-                    ['text' => 'FREDA FIVE' ,
-                        'id'   => 'FREDA FIVE-514'] ,
-                    ['text' => 'CELLO' ,
-                        'id'   => 'CELLO-515'] ,
-                    ['text' => 'STAY COOL' ,
-                        'id'   => 'STAY COOL-516'] ,
-                    ['text' => 'SCOTT' ,
-                        'id'   => 'SCOTT-517'] ,
-                    ['text' => 'TOSKA' ,
-                        'id'   => 'TOSKA-518'] ,
-                    ['text' => 'SAN JOY' ,
-                        'id'   => 'SAN JOY-519'] ,
-                    ['text' => 'CHOISE' ,
-                        'id'   => 'CHOISE-520'] ,
-                    ['text' => 'KINTRO' ,
-                        'id'   => 'KINTRO-521'] ,
-                    ['text' => 'SILVERGATE' ,
-                        'id'   => 'SILVERGATE-522'] ,
-                    ['text' => 'NIKIBIKI' ,
-                        'id'   => 'NIKIBIKI-523'] ,
-                    ['text' => 'BE COOL' ,
-                        'id'   => 'BE COOL-524'] ,
-                    ['text' => 'FLAMINGO' ,
-                        'id'   => 'FLAMINGO-525'] ,
-                    ['text' => 'JOIA TRAD' ,
-                        'id'   => 'JOIA TRAD-526'] ,
-                    ['text' => 'ELEGANCE ENTRERPRISE  CORP.' ,
-                        'id'   => 'ELEGANCE ENTRERPRISE  CORP.-527'] ,
-                    ['text' => 'FOTUNE D' ,
-                        'id'   => 'FOTUNE D-528'] ,
-                    ['text' => 'LEGEND' ,
-                        'id'   => 'LEGEND-529'] ,
-                    ['text' => 'SUNVISTA' ,
-                        'id'   => 'SUNVISTA-530'] ,
-                    ['text' => 'POLA' ,
-                        'id'   => 'POLA-531'] ,
-                    ['text' => 'NICOLE' ,
-                        'id'   => 'NICOLE-532'] ,
-                    ['text' => 'GIGI LOOK' ,
-                        'id'   => 'GIGI LOOK-533'] ,
-                    ['text' => 'UNIT FASH' ,
-                        'id'   => 'UNIT FASH-534'] ,
-                    ['text' => 'CIEN' ,
-                        'id'   => 'CIEN-535'] ,
-                    ['text' => 'TWGO' ,
-                        'id'   => 'TWGO-536'] ,
-                    ['text' => 'SCOTT' ,
-                        'id'   => 'SCOTT-537'] ,
-                    ['text' => 'MISS ME' ,
-                        'id'   => 'MISS ME-538'] ,
-                    ['text' => 'ORIGINAL' ,
-                        'id'   => 'ORIGINAL-539'] ,
-                    ['text' => 'PIA' ,
-                        'id'   => 'PIA-540'] ,
-                    ['text' => 'KAN CAN' ,
-                        'id'   => 'KAN CAN-541'] ,
-                    ['text' => 'FINESSE' ,
-                        'id'   => 'FINESSE-542'] ,
-                    ['text' => 'JOLIE BEAU' ,
-                        'id'   => 'JOLIE BEAU-543'] ,
-                    ['text' => 'ESTAM' ,
-                        'id'   => 'ESTAM-544'] ,
-                    ['text' => 'OPERA' ,
-                        'id'   => 'OPERA-545'] ,
-                    ['text' => 'WATCH L.A.' ,
-                        'id'   => 'WATCH L.A.-546'] ,
-                    ['text' => 'E.R.GENERATION' ,
-                        'id'   => 'E.R.GENERATION-547'] ,
-                    ['text' => 'LULUMARI' ,
-                        'id'   => 'LULUMARI-548'] ,
-                    ['text' => 'BIZZ' ,
-                        'id'   => 'BIZZ-549'] ,
-                    ['text' => 'YAG' ,
-                        'id'   => 'YAG-550'] ,
-                    ['text' => 'EVENT' ,
-                        'id'   => 'EVENT-551'] ,
-                    ['text' => 'DO&BE' ,
-                        'id'   => 'DO&BE-552'] ,
-                    ['text' => 'AMERICAN ONE' ,
-                        'id'   => 'AMERICAN ONE-553'] ,
-                    ['text' => 'CLOTHING' ,
-                        'id'   => 'CLOTHING-554'] ,
-                    ['text' => 'BANANA USA' ,
-                        'id'   => 'BANANA USA-555'] ,
-                    ['text' => 'Y APPAREL' ,
-                        'id'   => 'Y APPAREL-556'] ,
-                    ['text' => 'PIACE' ,
-                        'id'   => 'PIACE-557'] ,
-                    ['text' => 'NOA' ,
-                        'id'   => 'NOA-558'] ,
-                    ['text' => 'PUNEHA' ,
-                        'id'   => 'PUNEHA-559'] ,
-                    ['text' => 'CERES' ,
-                        'id'   => 'CERES-560'] ,
-                    ['text' => 'CHERISH' ,
-                        'id'   => 'CHERISH-561'] ,
-                    ['text' => 'SUGAR LIPS' ,
-                        'id'   => 'SUGAR LIPS-562'] ,
-                    ['text' => 'MOON COLLECTION' ,
-                        'id'   => 'MOON COLLECTION-563'] ,
-                    ['text' => 'POETRY CLOTHING' ,
-                        'id'   => 'POETRY CLOTHING-564'] ,
-                    ['text' => 'FORTUN DINAMIC' ,
-                        'id'   => 'FORTUN DINAMIC-565'] ,
-                    ['text' => 'SUMMER RIO' ,
-                        'id'   => 'SUMMER RIO-566'] ,
-                    ['text' => 'COSTAR' ,
-                        'id'   => 'COSTAR-567'] ,
-                    ['text' => 'ROSE DIMPLE' ,
-                        'id'   => 'ROSE DIMPLE-568'] ,
-                    ['text' => 'PEPPER' ,
-                        'id'   => 'PEPPER-569'] ,
-                    ['text' => 'SHOE MAGNATE' ,
-                        'id'   => 'SHOE MAGNATE-570'] ,
-                    ['text' => 'RODEM INC' ,
-                        'id'   => 'RODEM INC-571'] ,
-                    ['text' => 'IRE FASHION' ,
-                        'id'   => 'IRE FASHION-572'] ,
-                    ['text' => 'LETTE' ,
-                        'id'   => 'LETTE-573'] ,
-                    ['text' => 'MACHINE' ,
-                        'id'   => 'MACHINE-574'] ,
-                    ['text' => 'NEW TOWER' ,
-                        'id'   => 'NEW TOWER-575'] ,
-                    ['text' => 'SUSIE' ,
-                        'id'   => 'SUSIE-576'] ,
-                    ['text' => 'VENECCIA' ,
-                        'id'   => 'VENECCIA-577'] ,
-                    ['text' => 'POEMA' ,
-                        'id'   => 'POEMA-578'] ,
-                    ['text' => 'PRETTY GOOD' ,
-                        'id'   => 'PRETTY GOOD-579'] ,
-                    ['text' => 'ICE VANILLA' ,
-                        'id'   => 'ICE VANILLA-580'] ,
-                    ['text' => 'PROFIL' ,
-                        'id'   => 'PROFIL-581'] ,
-                    ['text' => 'AMBIANCE' ,
-                        'id'   => 'AMBIANCE-582'] ,
-                    ['text' => 'STAR OF INDIA' ,
-                        'id'   => 'STAR OF INDIA-583'] ,
-                    ['text' => 'NATALI' ,
-                        'id'   => 'NATALI-584'] ,
-                    ['text' => 'PLAY GIRLZ' ,
-                        'id'   => 'PLAY GIRLZ-585'] ,
-                    ['text' => 'SYBER GIRL' ,
-                        'id'   => 'SYBER GIRL-586'] ,
-                    ['text' => 'TOO MI' ,
-                        'id'   => 'TOO MI-587'] ,
-                    ['text' => 'SYBER GIRL' ,
-                        'id'   => 'SYBER GIRL-588'] ,
-                    ['text' => 'MARINE BLU' ,
-                        'id'   => 'MARINE BLU-589'] ,
-                    ['text' => 'NEW MOOD' ,
-                        'id'   => 'NEW MOOD-590'] ,
-                    ['text' => 'MODEL' ,
-                        'id'   => 'MODEL-591'] ,
-                    ['text' => 'INTERI' ,
-                        'id'   => 'INTERI-592'] ,
-                    ['text' => 'TOP MONDIAL' ,
-                        'id'   => 'TOP MONDIAL-593'] ,
-                    ['text' => 'O CASUAL' ,
-                        'id'   => 'O CASUAL-594'] ,
-                    ['text' => 'IRIS' ,
-                        'id'   => 'IRIS-595'] ,
-                    ['text' => 'MINUET' ,
-                        'id'   => 'MINUET-596'] ,
-                    ['text' => 'G.O.MAX' ,
-                        'id'   => 'G.O.MAX-597'] ,
-                    ['text' => 'Comercializadora R. M. S., c. a.' ,
-                        'id'   => 'Comercializadora R. M. S., c. a.-598'] ,
-                    ['text' => 'TEENPLO' ,
-                        'id'   => 'TEENPLO-599'] ,
-                    ['text' => 'MIYAO' ,
-                        'id'   => 'MIYAO-600'] ,
-                    ['text' => 'VIA VAI' ,
-                        'id'   => 'VIA VAI-601'] ,
-                    ['text' => 'CANTATA' ,
-                        'id'   => 'CANTATA-602'] ,
-                    ['text' => 'ENTRO' ,
-                        'id'   => 'ENTRO-603'] ,
-                    ['text' => 'TIMING' ,
-                        'id'   => 'TIMING-604'] ,
-                    ['text' => 'SO ROUGE' ,
-                        'id'   => 'SO ROUGE-605'] ,
-                    ['text' => 'MEGHAN' ,
-                        'id'   => 'MEGHAN-606'] ,
-                    ['text' => 'SUN WAY' ,
-                        'id'   => 'SUN WAY-607'] ,
-                    ['text' => 'FIRST LOOK' ,
-                        'id'   => 'FIRST LOOK-608'] ,
-                    ['text' => 'SALDO' ,
-                        'id'   => 'SALDO-609'] ,
-                    ['text' => 'ELEGANT FOOTWEAR' ,
-                        'id'   => 'ELEGANT FOOTWEAR-610'] ,
-                    ['text' => 'BLISS' ,
-                        'id'   => 'BLISS-611'] ,
-                    ['text' => 'CLOSET' ,
-                        'id'   => 'CLOSET-612'] ,
-                    ['text' => 'FORNIA' ,
-                        'id'   => 'FORNIA-613'] ,
-                    ['text' => 'P.O.P' ,
-                        'id'   => 'P.O.P-614'] ,
-                    ['text' => 'HIMEX  CO' ,
-                        'id'   => 'HIMEX  CO-615'] ,
-                    ['text' => 'BEIZA' ,
-                        'id'   => 'BEIZA-616'] ,
-                    ['text' => 'chloe jeans' ,
-                        'id'   => 'chloe jeans-617'] ,
-                    ['text' => 'JES' ,
-                        'id'   => 'JES-618'] ,
-                    ['text' => 'SCARLETT' ,
-                        'id'   => 'SCARLETT-619'] ,
-                    ['text' => 'SANS SOUCI' ,
-                        'id'   => 'SANS SOUCI-620'] ,
-                    ['text' => 'SHADOW' ,
-                        'id'   => 'SHADOW-621'] ,
-                    ['text' => 'BOOM UP' ,
-                        'id'   => 'BOOM UP-622'] ,
-                    ['text' => 'MICHEL' ,
-                        'id'   => 'MICHEL-623'] ,
-                    ['text' => 'SOMME' ,
-                        'id'   => 'SOMME-624'] ,
-                    ['text' => 'MAGENTA' ,
-                        'id'   => 'MAGENTA-625'] ,
-                    ['text' => 'SOPRANO' ,
-                        'id'   => 'SOPRANO-626'] ,
-                    ['text' => 'WILDCAT' ,
-                        'id'   => 'WILDCAT-627'] ,
-                    ['text' => 'OBOE' ,
-                        'id'   => 'OBOE-628'] ,
-                    ['text' => 'imagine' ,
-                        'id'   => 'imagine-629'] ,
-                    ['text' => 'CAPRI' ,
-                        'id'   => 'CAPRI-630'] ,
-                    ['text' => 'ADRIANA' ,
-                        'id'   => 'ADRIANA-631'] ,
-                    ['text' => 'WAX JEANS' ,
-                        'id'   => 'WAX JEANS-632'] ,
-                    ['text' => 'LOVELY DAY' ,
-                        'id'   => 'LOVELY DAY-633'] ,
-                    ['text' => 'SUSIE' ,
-                        'id'   => 'SUSIE-634'] ,
-                    ['text' => 'OBJET' ,
-                        'id'   => 'OBJET-635'] ,
-                    ['text' => 'Blue Impus' ,
-                        'id'   => 'Blue Impus-636'] ,
-                    ['text' => 'Sandrea' ,
-                        'id'   => 'Sandrea-637'] ,
-                    ['text' => 'double zero' ,
-                        'id'   => 'double zero-638'] ,
-                    ['text' => 'TRAC' ,
-                        'id'   => 'TRAC-639'] ,
-                    ['text' => 'GENERAL' ,
-                        'id'   => 'GENERAL-640'] ,
-                    ['text' => 'BACK STAGE' ,
-                        'id'   => 'BACK STAGE-641'] ,
-                    ['text' => 'MISOPE' ,
-                        'id'   => 'MISOPE-642'] ,
-                    ['text' => 'SO COOL' ,
-                        'id'   => 'SO COOL-643'] ,
-                    ['text' => 'STWELVE' ,
-                        'id'   => 'STWELVE-644'] ,
-                    ['text' => 'TOUCH 9' ,
-                        'id'   => 'TOUCH 9-645'] ,
-                    ['text' => 'KEMPO GIRL' ,
-                        'id'   => 'KEMPO GIRL-646'] ,
-                    ['text' => 'LUCA INC' ,
-                        'id'   => 'LUCA INC-647'] ,
-                    ['text' => 'MYSTIC' ,
-                        'id'   => 'MYSTIC-648'] ,
-                    ['text' => 'I HOPE' ,
-                        'id'   => 'I HOPE-649'] ,
-                    ['text' => 'EAST LION' ,
-                        'id'   => 'EAST LION-650'] ,
-                    ['text' => 'EASY POWER' ,
-                        'id'   => 'EASY POWER-651'] ,
-                    ['text' => 'ICOM DESIGN' ,
-                        'id'   => 'ICOM DESIGN-652'] ,
-                    ['text' => 'YS FASHION' ,
-                        'id'   => 'YS FASHION-653'] ,
-                    ['text' => 'NEW MOINE' ,
-                        'id'   => 'NEW MOINE-654'] ,
-                    ['text' => 'JEANETTE' ,
-                        'id'   => 'JEANETTE-655'] ,
-                    ['text' => 'P&S USA' ,
-                        'id'   => 'P&S USA-656'] ,
-                    ['text' => 'NOBLE U' ,
-                        'id'   => 'NOBLE U-657'] ,
-                    ['text' => 'P & S  USA' ,
-                        'id'   => 'P & S  USA-658'] ,
-                    ['text' => 'CATWALK' ,
-                        'id'   => 'CATWALK-659'] ,
-                    ['text' => 'PRECIOSA' ,
-                        'id'   => 'PRECIOSA-660'] ,
-                    ['text' => 'B TRU' ,
-                        'id'   => 'B TRU-661'] ,
-                    ['text' => 'GRIFFLIN' ,
-                        'id'   => 'GRIFFLIN-662'] ,
-                    ['text' => 'VOLL' ,
-                        'id'   => 'VOLL-663'] ,
-                    ['text' => 'Hanger' ,
-                        'id'   => 'Hanger-664'] ,
-                    ['text' => 'Karma Collection Inc' ,
-                        'id'   => 'Karma Collection Inc-665'] ,
-                    ['text' => 'E-Zen' ,
-                        'id'   => 'E-Zen-666'] ,
-                    ['text' => 'MICHAEL ANTONIO' ,
-                        'id'   => 'MICHAEL ANTONIO-667'] ,
-                    ['text' => 'REACTION' ,
-                        'id'   => 'REACTION-668'] ,
-                    ['text' => 'GRENN VILLE' ,
-                        'id'   => 'GRENN VILLE-669'] ,
-                    ['text' => 'MONTEAU' ,
-                        'id'   => 'MONTEAU-670'] ,
-                    ['text' => 'PLASTIC' ,
-                        'id'   => 'PLASTIC-671'] ,
-                    ['text' => 'IN JOY' ,
-                        'id'   => 'IN JOY-672'] ,
-                    ['text' => 'SUN VISTA' ,
-                        'id'   => 'SUN VISTA-673'] ,
-                    ['text' => 'CATWALK' ,
-                        'id'   => 'CATWALK-674'] ,
-                    ['text' => 'CHERRY KOKO' ,
-                        'id'   => 'CHERRY KOKO-675'] ,
-                    ['text' => 'BIZZ' ,
-                        'id'   => 'BIZZ-676'] ,
-                    ['text' => 'KHAKI KREW' ,
-                        'id'   => 'KHAKI KREW-677'] ,
-                    ['text' => 'PREMIER' ,
-                        'id'   => 'PREMIER-678'] ,
-                    ['text' => 'LUCE' ,
-                        'id'   => 'LUCE-679'] ,
-                    ['text' => 'JOSHNA CLOTHING' ,
-                        'id'   => 'JOSHNA CLOTHING-680'] ,
-                    ['text' => 'CRYSTAL' ,
-                        'id'   => 'CRYSTAL-681'] ,
-                    ['text' => 'JULIA' ,
-                        'id'   => 'JULIA-682'] ,
-                    ['text' => 'SOLITAIRE' ,
-                        'id'   => 'SOLITAIRE-683'] ,
-                    ['text' => 'NISI JEANS' ,
-                        'id'   => 'NISI JEANS-684'] ,
-                    ['text' => 'L.A. IDOL FASHION' ,
-                        'id'   => 'L.A. IDOL FASHION-685'] ,
-                    ['text' => 'KAIDAL' ,
-                        'id'   => 'KAIDAL-686'] ,
-                    ['text' => 'ginger' ,
-                        'id'   => 'ginger-687'] ,
-                    ['text' => 'MINE' ,
-                        'id'   => 'MINE-688'] ,
-                    ['text' => 'TEEN BELL' ,
-                        'id'   => 'TEEN BELL-689'] ,
-                    ['text' => 'COTTON CANDY' ,
-                        'id'   => 'COTTON CANDY-690'] ,
-                    ['text' => 'AGGIE' ,
-                        'id'   => 'AGGIE-691'] ,
-                    ['text' => 'k-scion' ,
-                        'id'   => 'k-scion-692'] ,
-                    ['text' => 'the hanger' ,
-                        'id'   => 'the hanger-693'] ,
-                    ['text' => 'WEST 36 CORP' ,
-                        'id'   => 'WEST 36 CORP-694'] ,
-                    ['text' => 'STYLE BIZ' ,
-                        'id'   => 'STYLE BIZ-695'] ,
-                    ['text' => 'OLALA' ,
-                        'id'   => 'OLALA-696'] ,
-                    ['text' => 'MIND CODE' ,
-                        'id'   => 'MIND CODE-697'] ,
-                    ['text' => 'COME COMO' ,
-                        'id'   => 'COME COMO-698'] ,
-                    ['text' => 'pastel design' ,
-                        'id'   => 'pastel design-699'] ,
-                    ['text' => 'deco' ,
-                        'id'   => 'deco-794'] ,
-                    ['text' => 'feline' ,
-                        'id'   => 'feline-795'] ,
-                    ['text' => 'unisono' ,
-                        'id'   => 'unisono-796'] ,
-                    ['text' => 'envied' ,
-                        'id'   => 'envied-797'] ,
-                    ['text' => 'MAXINE PARIS' ,
-                        'id'   => 'MAXINE PARIS-798'] ,
-                    ['text' => 'katia' ,
-                        'id'   => 'katia-799'] ,
-                    ['text' => 'DEUX LUX' ,
-                        'id'   => 'DEUX LUX-800'] ,
-                    ['text' => 'MAGAZINE' ,
-                        'id'   => 'MAGAZINE-801'] ,
-                    ['text' => 'EBISU' ,
-                        'id'   => 'EBISU-802'] ,
-                    ['text' => 'BLUE COLLECTION' ,
-                        'id'   => 'BLUE COLLECTION-803'] ,
-                    ['text' => 'ODIN FASHION' ,
-                        'id'   => 'ODIN FASHION-804'] ,
-                    ['text' => 'LUCCA' ,
-                        'id'   => 'LUCCA-805'] ,
-                    ['text' => 'Monkey Banana' ,
-                        'id'   => 'Monkey Banana-806'] ,
-                    ['text' => 'CHI OLE' ,
-                        'id'   => 'CHI OLE-807'] ,
-                    ['text' => 'ANGELA' ,
-                        'id'   => 'ANGELA-808'] ,
-                    ['text' => 'MUSTARD SEED' ,
-                        'id'   => 'MUSTARD SEED-809'] ,
-                    ['text' => 'CELLO' ,
-                        'id'   => 'CELLO-810'] ,
-                    ['text' => 'SUPER LINE' ,
-                        'id'   => 'SUPER LINE-811'] ,
-                    ['text' => 'KMQINTL INC' ,
-                        'id'   => 'KMQINTL INC-812'] ,
-                    ['text' => 'DON LUCE' ,
-                        'id'   => 'DON LUCE-813'] ,
-                    ['text' => 'SHOES REPUBLIC' ,
-                        'id'   => 'SHOES REPUBLIC-814'] ,
-                    ['text' => 'DNA COUTURE' ,
-                        'id'   => 'DNA COUTURE-815'] ,
-                    ['text' => 'DE NOVO IMPORT' ,
-                        'id'   => 'DE NOVO IMPORT-816'] ,
-                    ['text' => 'CHAIN & FANTASIA' ,
-                        'id'   => 'CHAIN & FANTASIA-817'] ,
-                    ['text' => 'SI STYLE' ,
-                        'id'   => 'SI STYLE-818'] ,
-                    ['text' => 'TEA SHOP' ,
-                        'id'   => 'TEA SHOP-819'] ,
-                    ['text' => 'MIELE' ,
-                        'id'   => 'MIELE-820'] ,
-                    ['text' => 'MARQUIS' ,
-                        'id'   => 'MARQUIS-821'] ,
-                    ['text' => 'CECI JEWELRY INC' ,
-                        'id'   => 'CECI JEWELRY INC-822'] ,
-                    ['text' => 'TENPLO' ,
-                        'id'   => 'TENPLO-823'] ,
-                    ['text' => 'PRINCE INTERNATIONAL.CORP' ,
-                        'id'   => 'PRINCE INTERNATIONAL.CORP-924'] ,
-                    ['text' => 'Uno Mode Inc' ,
-                        'id'   => 'Uno Mode Inc-925'] ,
-                    ['text' => 'ANDES' ,
-                        'id'   => 'ANDES-926'] ,
-                    ['text' => 'U&IIMPORT INC.' ,
-                        'id'   => 'U&IIMPORT INC.-927'] ,
-                    ['text' => 'JOIA HANDBAGS' ,
-                        'id'   => 'JOIA HANDBAGS-929'] ,
-                    ['text' => 'DA BIG, INC' ,
-                        'id'   => 'DA BIG, INC-930'] ,
-                    ['text' => 'BETTER BE' ,
-                        'id'   => 'BETTER BE-931'] ,
-                    ['text' => 'ARYEH' ,
-                        'id'   => 'ARYEH-932'] ,
-                    ['text' => 'THEME' ,
-                        'id'   => 'THEME-933'] ,
-                    ['text' => 'MaJose' ,
-                        'id'   => 'MaJose-944'] ,
-                    ['text' => 'Nine West Margarita,C.A.' ,
-                        'id'   => 'Nine West Margarita,C.A.-955'] ,
-                    ['text' => 'OORI' ,
-                        'id'   => 'OORI-956'] ,
-                    ['text' => 'MJ' ,
-                        'id'   => 'MJ-957'] ,
-                    ['text' => 'FRESHINE' ,
-                        'id'   => 'FRESHINE-958'] ,
-                    ['text' => 'TEAM' ,
-                        'id'   => 'TEAM-959'] ,
-                    ['text' => 'HUSH' ,
-                        'id'   => 'HUSH-960'] ,
-                    ['text' => 'DE NOVO IMPORTS, INC' ,
-                        'id'   => 'DE NOVO IMPORTS, INC-961'] ,
-                    ['text' => 'POEMA' ,
-                        'id'   => 'POEMA-962'] ,
-                    ['text' => 'TEA' ,
-                        'id'   => 'TEA-963'] ,
-                    ['text' => 'LOVE STITCH' ,
-                        'id'   => 'LOVE STITCH-964'] ,
-                    ['text' => 'BANANA MONKEY' ,
-                        'id'   => 'BANANA MONKEY-965'] ,
-                    ['text' => 'MIA DE NOVO' ,
-                        'id'   => 'MIA DE NOVO-966'] ,
-                    ['text' => 'ESMOR' ,
-                        'id'   => 'ESMOR-967'] ,
-                    ['text' => 'ACCESORIOS' ,
-                        'id'   => 'ACCESORIOS-968'] ,
-                    ['text' => 'MANARA' ,
-                        'id'   => 'MANARA-969'] ,
-                    ['text' => 'Tranf Moda' ,
-                        'id'   => 'Tranf Moda-970'] ,
-                    ['text' => 'KESSLEY' ,
-                        'id'   => 'KESSLEY-971'] ,
-                    ['text' => 'GRACE IN L.A' ,
-                        'id'   => 'GRACE IN L.A-972'] ,
-                    ['text' => 'PARADISE MISS' ,
-                        'id'   => 'PARADISE MISS-973'] ,
-                    ['text' => 'Andrea Makhoul' ,
-                        'id'   => 'Andrea Makhoul-974'] ,
-                    ['text' => 'LA BANGA' ,
-                        'id'   => 'LA BANGA-982'] ,
-                    ['text' => 'PINK BY ELE' ,
-                        'id'   => 'PINK BY ELE-984'] ,
-                    ['text' => 'DIVA' ,
-                        'id'   => 'DIVA-987'] ,
-                    ['text' => 'RIPLAY' ,
-                        'id'   => 'RIPLAY-988'] ,
-                    ['text' => 'FREE SPIRIT' ,
-                        'id'   => 'FREE SPIRIT-989'] ,
-                    ['text' => 'MUSTHAVE' ,
-                        'id'   => 'MUSTHAVE-990'] ,
-                    ['text' => 'CECICOTOWN' ,
-                        'id'   => 'CECICOTOWN-991'] ,
-                    ['text' => 'HAKKRAFTY' ,
-                        'id'   => 'HAKKRAFTY-992'] ,
-                    ['text' => 'PORTUA' ,
-                        'id'   => 'PORTUA-993'] ,
-                    ['text' => 'CO&CO' ,
-                        'id'   => 'CO&CO-994'] ,
-                    ['text' => 'TCEC' ,
-                        'id'   => 'TCEC-995'] ,
-                    ['text' => 'MISSKELLY' ,
-                        'id'   => 'MISSKELLY-996'] ,
-                    ['text' => 'HAVE' ,
-                        'id'   => 'HAVE-998'] ,
-                    ['text' => 'VALENTINE' ,
-                        'id'   => 'VALENTINE-999'] ,
-                    ['text' => 'THE ONE' ,
-                        'id'   => 'THE ONE-1000'] ,
-                    ['text' => 'FASHION JEWELRY' ,
-                        'id'   => 'FASHION JEWELRY-1001'] ,
-                    ['text' => 'MMS TRADING' ,
-                        'id'   => 'MMS TRADING-1002'] ,
-                    ['text' => 'ADIXION' ,
-                        'id'   => 'ADIXION-1003'] ,
-                    ['text' => 'IXIA' ,
-                        'id'   => 'IXIA-1004'] ,
-                    ['text' => 'CYRUS' ,
-                        'id'   => 'CYRUS-1005'] ,
-                    ['text' => 'DEYCE' ,
-                        'id'   => 'DEYCE-1006'] ,
-                    ['text' => 'MICHELLE' ,
-                        'id'   => 'MICHELLE-1007'] ,
-                    ['text' => 'GRACEINLA' ,
-                        'id'   => 'GRACEINLA-1008'] ,
-                    ['text' => 'WENZHOU XIALI TRINTIN C.O' ,
-                        'id'   => 'WENZHOU XIALI TRINTIN C.O-1009'] ,
-                    ['text' => 'SUNGLASSES' ,
-                        'id'   => 'SUNGLASSES-1010'] ,
-                    ['text' => 'S. FASHION' ,
-                        'id'   => 'S. FASHION-1011'] ,
-                    ['text' => 'GENERATION' ,
-                        'id'   => 'GENERATION-1012'] ,
-                    ['text' => 'DAVINCI' ,
-                        'id'   => 'DAVINCI-1013'] ,
-                    ['text' => 'CERICE' ,
-                        'id'   => 'CERICE-1014'] ,
-                    ['text' => 'ELEGANCE' ,
-                        'id'   => 'ELEGANCE-1015'] ,
-                    ['text' => 'JTS TRADING' ,
-                        'id'   => 'JTS TRADING-1016'] ,
-                    ['text' => 'FINAL TOUCH' ,
-                        'id'   => 'FINAL TOUCH-1017'] ,
-                    ['text' => 'FAMOSA' ,
-                        'id'   => 'FAMOSA-1018'] ,
-                    ['text' => 'SOHO LADY' ,
-                        'id'   => 'SOHO LADY-1019'] ,
-                    ['text' => 'EVER AFTER' ,
-                        'id'   => 'EVER AFTER-1020'] ,
-                    ['text' => 'TEC' ,
-                        'id'   => 'TEC-1021'] ,
-                    ['text' => 'THE HATTER' ,
-                        'id'   => 'THE HATTER-1022'] ,
-                    ['text' => 'AISHOP' ,
-                        'id'   => 'AISHOP-1023'] ,
-                    ['text' => 'PAMELA' ,
-                        'id'   => 'PAMELA-1024'] ,
-                    ['text' => 'DONGGUAN LIABU' ,
-                        'id'   => 'DONGGUAN LIABU-1025'] ,
-                    ['text' => 'SERENA' ,
-                        'id'   => 'SERENA-1026'] ,
-                    ['text' => 'NOVO' ,
-                        'id'   => 'NOVO-1027'] ,
-                    ['text' => 'CASUAL LAND' ,
-                        'id'   => 'CASUAL LAND-1028'] ,
-                    ['text' => 'CRACE' ,
-                        'id'   => 'CRACE-1029'] ,
-                    ['text' => 'POTTER SPORT' ,
-                        'id'   => 'POTTER SPORT-1030'] ,
-                    ['text' => 'SEGURU' ,
-                        'id'   => 'SEGURU-1031'] ,
-                    ['text' => 'MISS 21' ,
-                        'id'   => 'MISS 21-1032'] ,
-                    ['text' => 'ELEGANT' ,
-                        'id'   => 'ELEGANT-1033'] ,
-                    ['text' => 'BISU' ,
-                        'id'   => 'BISU-1034'] ,
-                    ['text' => 'ELLA' ,
-                        'id'   => 'ELLA-1035'] ,
-                    ['text' => 'CHIC GALLERY' ,
-                        'id'   => 'CHIC GALLERY-1036'] ,
-                    ['text' => 'ICON' ,
-                        'id'   => 'ICON-1037'] ,
-                    ['text' => 'INVERSIONES PORLAMAR 2012, C. A.' ,
-                        'id'   => 'INVERSIONES PORLAMAR 2012, C. A.-1038'] ,
-                    ['text' => 'QIAN HUANG' ,
-                        'id'   => 'QIAN HUANG-1039'] ,
-                    ['text' => 'MANUFACTURAS MAPA MUNDI, C.A.' ,
-                        'id'   => 'MANUFACTURAS MAPA MUNDI, C.A.-1040'] ,
-                    ['text' => 'INVERSIONES MC ADAMS, C. A.' ,
-                        'id'   => 'INVERSIONES MC ADAMS, C. A.-1041'] ,
-                    ['text' => 'AGGIE' ,
-                        'id'   => 'AGGIE-1042'] ,
-                    ['text' => 'NINA' ,
-                        'id'   => 'NINA-1043'] ,
-                    ['text' => 'SOHO GIRLS' ,
-                        'id'   => 'SOHO GIRLS-1044'] ,
-                    ['text' => 'TRUE LOVE 2012' ,
-                        'id'   => 'TRUE LOVE 2012-1045'] ,
-                    ['text' => 'COVER STITCHED' ,
-                        'id'   => 'COVER STITCHED-1047'] ,
-                    ['text' => 'ShoeShop Group' ,
-                        'id'   => 'ShoeShop Group-1048'] ,
-                    ['text' => 'VIRGIN ONLY' ,
-                        'id'   => 'VIRGIN ONLY-1049'] ,
-                    ['text' => 'HEM & THREAD' ,
-                        'id'   => 'HEM & THREAD-1050'] ,
-                    ['text' => 'ARK & CO' ,
-                        'id'   => 'ARK & CO-1051'] ,
-                    ['text' => 'Inversiones Risan SRL' ,
-                        'id'   => 'Inversiones Risan SRL-1052'] ,
-                    ['text' => 'MATILDA' ,
-                        'id'   => 'MATILDA-1053'] ,
-                    ['text' => 'INVERSIONES CORAL XXI, C. A.' ,
-                        'id'   => 'INVERSIONES CORAL XXI, C. A.-1054'] ,
-                    ['text' => '(Dev) INVERSIONES CORAL XXI, C. A.' ,
-                        'id'   => '(Dev) INVERSIONES CORAL XXI, C. A.-1055'] ,
-                    ['text' => '(Dev) INVERSIONES MC ADAMS, C. A.' ,
-                        'id'   => '(Dev) INVERSIONES MC ADAMS, C. A.-1056'] ,
-                    ['text' => '(Dev) MANUFACTURAS MAPA MUNDI, C.A.' ,
-                        'id'   => '(Dev) MANUFACTURAS MAPA MUNDI, C.A.-1057'] ,
-                    ['text' => 'ZINGA' ,
-                        'id'   => 'ZINGA-1058'] ,
-                    ['text' => 'C. LUCE' ,
-                        'id'   => 'C. LUCE-1059'] ,
-                    ['text' => 'DOUBLE ZERO INC' ,
-                        'id'   => 'DOUBLE ZERO INC-1060'] ,
-                    ['text' => 'INVERSIONES MUR GLOBAL, C. A.' ,
-                        'id'   => 'INVERSIONES MUR GLOBAL, C. A.-1061'] ,
-                    ['text' => 'INVERSIONES OCEANICA 32, C. A.' ,
-                        'id'   => 'INVERSIONES OCEANICA 32, C. A.-1062'] ,
-                    ['text' => 'INVERSIONES OXANAM, C. A.' ,
-                        'id'   => 'INVERSIONES OXANAM, C. A.-1063'] ,
-                    ['text' => 'cc' ,
-                        'id'   => 'cc-1064'] ,
-                    ['text' => 'MODA INVESTMENTS' ,
-                        'id'   => 'MODA INVESTMENTS-1065'] ,
-                    ['text' => 'LA REYNA' ,
-                        'id'   => 'LA REYNA-1066'] ,
-                    ['text' => '(Dev) Inversiones MUR GLOBAL, c. a.' ,
-                        'id'   => '(Dev) Inversiones MUR GLOBAL, c. a.-1067'] ,
-                    ['text' => 'NESLAY DESINGNER INC' ,
-                        'id'   => 'NESLAY DESINGNER INC-1068'] ,
-                    ['text' => '(Dev) Inversiones Oxanam, c. a.' ,
-                        'id'   => '(Dev) Inversiones Oxanam, c. a.-1069'] ,
-                    ['text' => 'LIMENCHILI' ,
-                        'id'   => 'LIMENCHILI-1070'] ,
-                    ['text' => 'GRUPO 6383615, C. A.' ,
-                        'id'   => 'GRUPO 6383615, C. A.-1071'] ,
-                    ['text' => '(Dev) GRUPO 6383615, C. A.' ,
-                        'id'   => '(Dev) GRUPO 6383615, C. A.-1072'] ,
-                    ['text' => 'BCOOL' ,
-                        'id'   => 'BCOOL-1073'] ,
-                    ['text' => 'Y&Z' ,
-                        'id'   => 'Y&Z-1074'] ,
-                    ['text' => 'CHINA MARKET' ,
-                        'id'   => 'CHINA MARKET-1075'] ,
-                    ['text' => 'ICCO POLA' ,
-                        'id'   => 'ICCO POLA-1076'] ,
-                    ['text' => 'P&M' ,
-                        'id'   => 'P&M-1077'] ,
-                    ['text' => 'STYLE RACK' ,
-                        'id'   => 'STYLE RACK-1078'] ,
-                    ['text' => 'REMANENTE' ,
-                        'id'   => 'REMANENTE-1079'] ,
-                    ['text' => 'PHOENIX WORLD TRADE CHINA' ,
-                        'id'   => 'PHOENIX WORLD TRADE CHINA-251'] ,
-                        ] ;
-                break ;
-            case 'Exotik':
-                $data = [
-                    ['text' => 'INVERSIONES BANDUSH , C.A' ,
-                        'id'   => 'INVERSIONES BANDUSH , C.A-1'] ,
-                    ['text' => 'Original Fashion' ,
-                        'id'   => 'Original Fashion-2'] ,
-                    ['text' => 'ADRIANA BIJOUX' ,
-                        'id'   => 'ADRIANA BIJOUX-3'] ,
-                    ['text' => 'ORIGINAL FASHION (MCBO)' ,
-                        'id'   => 'ORIGINAL FASHION (MCBO)-4'] ,
-                    ['text' => 'ORCA CORPORACI”N INDUSTRIAL A.R. , C.A.' ,
-                        'id'   => 'ORCA CORPORACI”N INDUSTRIAL A.R. , C.A.-5'] ,
-                    ['text' => 'IMPORTACIONES TIGER SUNGLASS , C.A.' ,
-                        'id'   => 'IMPORTACIONES TIGER SUNGLASS , C.A.-6'] ,
-                    ['text' => 'DAD PUBLICIDAD' ,
-                        'id'   => 'DAD PUBLICIDAD-7'] ,
-                    ['text' => 'PRODUCCIONES ICONOGRAFICAS' ,
-                        'id'   => 'PRODUCCIONES ICONOGRAFICAS-8'] ,
-                    ['text' => 'BANESCO SEGUROS , C.A.' ,
-                        'id'   => 'BANESCO SEGUROS , C.A.-9'] ,
-                    ['text' => 'GEMAS ORFEBRERIA , C.A.' ,
-                        'id'   => '1GEMAS ORFEBRERIA , C.A.-0'] ,
-                    ['text' => 'TELCEL , C.A.' ,
-                        'id'   => '1TELCEL , C.A.-1'] ,
-                    ['text' => 'Di-Bari Mac-PC Services , C.A' ,
-                        'id'   => '1Di-Bari Mac-PC Services , C.A-2'] ,
-                    ['text' => 'DULCE ALMEIDA' ,
-                        'id'   => '1DULCE ALMEIDA-3'] ,
-                    ['text' => 'TAJ MAHAL BISUTERIA 54 , C.A.' ,
-                        'id'   => '1TAJ MAHAL BISUTERIA 54 , C.A.-4'] ,
-                    ['text' => 'INVERSIONES DORAL FASHION , C. A.' ,
-                        'id'   => '1INVERSIONES DORAL FASHION , C. A.-5'] ,
-                    ['text' => 'INVERSIONES EAST FASHION , S. A.' ,
-                        'id'   => '1INVERSIONES EAST FASHION , S. A.-6'] ,
-                    ['text' => 'INVERSIONES ISLAND FASHION , S. A.' ,
-                        'id'   => '1INVERSIONES ISLAND FASHION , S. A.-7'] ,
-                    ['text' => 'INVERSIONES PORLAMAR 2012 , C. A.' ,
-                        'id'   => '1INVERSIONES PORLAMAR 2012 , C. A.-8'] ,
-                    ['text' => 'INVERSIONES MCADAMS , C. A.' ,
-                        'id'   => '1INVERSIONES MCADAMS , C. A.-9'] ,
-                    ['text' => 'MANUFACTURAS MAPA MUNDI , C. A.' ,
-                        'id'   => '2MANUFACTURAS MAPA MUNDI , C. A.-0'] ,
-                    ['text' => 'PROVEEDOR PRUEBA' ,
-                        'id'   => '2PROVEEDOR PRUEBA-1'] ,
-                    ['text' => 'COLOR STORY' ,
-                        'id'   => '2COLOR STORY-2'] ,
-                    ['text' => 'POTTER SPORT' ,
-                        'id'   => '2POTTER SPORT-3'] ,
-                    ['text' => 'SILVERGATE' ,
-                        'id'   => '2SILVERGATE-4'] ,
-                    ['text' => 'TIMING' ,
-                        'id'   => '2TIMING-5'] ,
-                    ['text' => 'VIRGIN' ,
-                        'id'   => '2VIRGIN-6'] ,
-                    ['text' => 'HAVE' ,
-                        'id'   => '2HAVE-7'] ,
-                    ['text' => 'KAN CAN' ,
-                        'id'   => '2KAN CAN-8'] ,
-                    ['text' => 'ESTAM' ,
-                        'id'   => '2ESTAM-9'] ,
-                    ['text' => 'CELLO' ,
-                        'id'   => '3CELLO-0'] ,
-                    ['text' => 'LOVE STITCH' ,
-                        'id'   => '3LOVE STITCH-1'] ,
-                    ['text' => 'SILVERGATE' ,
-                        'id'   => '3SILVERGATE-2'] ,
-                    ['text' => 'TCEC' ,
-                        'id'   => '3TCEC-3'] ,
-                    ['text' => 'DO&BE' ,
-                        'id'   => '3DO&BE-4'] ,
-                    ['text' => 'MUSTARD SEED' ,
-                        'id'   => '3MUSTARD SEED-5'] ,
-                    ['text' => 'SUPERLINE' ,
-                        'id'   => '3SUPERLINE-6'] ,
-                    ['text' => 'MYSTIC INC.' ,
-                        'id'   => '3MYSTIC INC.-7'] ,
-                    ['text' => 'AMBIANCE' ,
-                        'id'   => '3AMBIANCE-8'] ,
-                    ['text' => 'MATILDA' ,
-                        'id'   => '3MATILDA-9'] ,
-                    ['text' => 'LA VI 89' ,
-                        'id'   => '4LA VI 89-0'] ,
-                    ['text' => 'CANTATA' ,
-                        'id'   => '4CANTATA-1'] ,
-                    ['text' => 'CECICO' ,
-                        'id'   => '4CECICO-2'] ,
-                    ['text' => 'ENTRO' ,
-                        'id'   => '4ENTRO-3'] ,
-                    ['text' => 'JOLIE INC' ,
-                        'id'   => '4JOLIE INC-4'] ,
-                    ['text' => 'JUST MI' ,
-                        'id'   => '4JUST MI-5'] ,
-                    ['text' => 'MUST HAVE' ,
-                        'id'   => '4MUST HAVE-6'] ,
-                    ['text' => 'FINAL TOUCH' ,
-                        'id'   => '4FINAL TOUCH-9'] ,
-                    ['text' => 'CASUAL LAN' ,
-                        'id'   => '5CASUAL LAN-0'] ,
-                    ['text' => 'FRESHINI' ,
-                        'id'   => '5FRESHINI-1'] ,
-                    ['text' => 'POEMA' ,
-                        'id'   => '5POEMA-2'] ,
-                    ['text' => 'INVERSIONES CORAL XXI , C. A.' ,
-                        'id'   => '5INVERSIONES CORAL XXI , C. A.-3'] ,
-                    ['text' => 'TRUE LOVE 2012' ,
-                        'id'   => '5TRUE LOVE 2012-4'] ,
-                    ['text' => 'INVERSIONES RISAN SRL' ,
-                        'id'   => '5INVERSIONES RISAN SRL-5'] ,
-                    ['text' => 'TONYS CLOSEOUTS' ,
-                        'id'   => '5TONYS CLOSEOUTS-6'] ,
-                    ['text' => '(DEV) INVERSIONES BANDUSH , C. A. ' ,
-                        'id'   => '5(DEV) INVERSIONES BANDUSH , C. A. -7'] ,
-                    ['text' => 'LA REINA INC' ,
-                        'id'   => '5LA REINA INC-8'] ,
-                    ['text' => 'CHOCOLATE U.S.A' ,
-                        'id'   => '5CHOCOLATE U.S.A-9'] ,
-                    ['text' => 'LULUMARI' ,
-                        'id'   => '6LULUMARI-0'] ,
-                    ['text' => 'ZINGA' ,
-                        'id'   => '6ZINGA-1'] ,
-                    ['text' => 'PINK BY ELE' ,
-                        'id'   => '6PINK BY ELE-2'] ,
-                    ['text' => 'SUNGLASES' ,
-                        'id'   => '6SUNGLASES-3'] ,
-                    ['text' => 'INVERSIONES MUR GLOBAL , C. A.' ,
-                        'id'   => '6INVERSIONES MUR GLOBAL , C. A.-4'] ,
-                    ['text' => 'INVERSIONES OCEANICA 32 , C. A.' ,
-                        'id'   => '6INVERSIONES OCEANICA 32 , C. A.-5'] ,
-                    ['text' => '(DEV) INVERSIONES CORAL XXI , C. A.' ,
-                        'id'   => '6(DEV) INVERSIONES CORAL XXI , C. A.-6'] ,
-                    ['text' => 'INVERSIONES OXANAM , C. A.' ,
-                        'id'   => '6INVERSIONES OXANAM , C. A.-7'] ,
-                    ['text' => 'MIS AVENUE' ,
-                        'id'   => '6MIS AVENUE-9'] ,
-                    ['text' => 'C. LUCE' ,
-                        'id'   => '7C. LUCE-0'] ,
-                    ['text' => 'SHOESHOP GRUP' ,
-                        'id'   => '7SHOESHOP GRUP-1'] ,
-                    ['text' => 'CECI JEWELRY , INC' ,
-                        'id'   => '7CECI JEWELRY , INC-2'] ,
-                    ['text' => 'DOUBLE ZERO INC' ,
-                        'id'   => '7DOUBLE ZERO INC-3'] ,
-                    ['text' => 'CERISE' ,
-                        'id'   => '7CERISE-4'] ,
-                    ['text' => 'NESLAY' ,
-                        'id'   => '7NESLAY-5'] ,
-                    ['text' => 'AKR&CO' ,
-                        'id'   => '7AKR&CO-6'] ,
-                    ['text' => 'CYRUS' ,
-                        'id'   => '7CYRUS-7'] ,
-                    ['text' => 'DE NOVO IMPORTS , INC.' ,
-                        'id'   => '7DE NOVO IMPORTS , INC.-8'] ,
-                    ['text' => 'GRUPO 6383615 , C. A.' ,
-                        'id'   => '7GRUPO 6383615 , C. A.-9'] ,
-                    ['text' => '(Dev) GRUPO 6383615 , C. A.' ,
-                        'id'   => '8(Dev) GRUPO 6383615 , C. A.-0'] ,
-                    ['text' => 'CHINA MARKET' ,
-                        'id'   => '8CHINA MARKET-1'] ,
-                    ['text' => 'Y&Z' ,
-                        'id'   => '8Y&Z-2'] ,
-                    ['text' => 'BCOOL' ,
-                        'id'   => '8BCOOL-3'] ,
-                    ['text' => '(dev) INVERSIONES OXANAM , CA' ,
-                        'id'   => '8(dev) INVERSIONES OXANAM , CA-4'] ,
-                    ['text' => '(dev) INVERSIONES OCEANICA 32 , C. A.' ,
-                        'id'   => '8(dev) INVERSIONES OCEANICA 32 , C. A.-5'] ,
-                    ['text' => '(dev) INVERSIONES MUR GLOBAL , C.A.' ,
-                        'id'   => '8(dev) INVERSIONES MUR GLOBAL , C.A.-6'] ,
-                    ['text' => 'JENIFER IN' ,
-                        'id'   => '8JENIFER IN-7'] ,
-                    ['text' => 'REMANENTE EXOTIK' ,
-                        'id'   => '8REMANENTE EXOTIK-8'] ,
-                    ['text' => 'SCANDAL' ,
-                        'id'   => '8SCANDAL-9'] ,
-                    ['text' => 'PHOENIX WORLD TRADE CHINA' ,
-                        'id'   => '9PHOENIX WORLD TRADE CHINA-0'] ,
-                    ['text' => 'INVERSIONES BANDUSH , C.A' ,
-                        'id'   => 'INVERSIONES BANDUSH , C.A-1'] ,
-                    ['text' => 'Original Fashion' ,
-                        'id'   => 'Original Fashion-2'] ,
-                    ['text' => 'ADRIANA BIJOUX' ,
-                        'id'   => 'ADRIANA BIJOUX-3'] ,
-                    ['text' => 'ORIGINAL FASHION (MCBO)' ,
-                        'id'   => 'ORIGINAL FASHION (MCBO)-4'] ,
-                    ['text' => 'ORCA CORPORACI”N INDUSTRIAL A.R. , C.A.' ,
-                        'id'   => 'ORCA CORPORACI”N INDUSTRIAL A.R. , C.A.-5'] ,
-                    ['text' => 'IMPORTACIONES TIGER SUNGLASS , C.A.' ,
-                        'id'   => 'IMPORTACIONES TIGER SUNGLASS , C.A.-6'] ,
-                    ['text' => 'DAD PUBLICIDAD' ,
-                        'id'   => 'DAD PUBLICIDAD-7'] ,
-                    ['text' => 'PRODUCCIONES ICONOGRAFICAS' ,
-                        'id'   => 'PRODUCCIONES ICONOGRAFICAS-8'] ,
-                    ['text' => 'BANESCO SEGUROS , C.A.' ,
-                        'id'   => 'BANESCO SEGUROS , C.A.-9'] ,
-                    ['text' => 'GEMAS ORFEBRERIA , C.A.' ,
-                        'id'   => '1GEMAS ORFEBRERIA , C.A.-0'] ,
-                    ['text' => 'TELCEL , C.A.' ,
-                        'id'   => '1TELCEL , C.A.-1'] ,
-                    ['text' => 'Di-Bari Mac-PC Services , C.A' ,
-                        'id'   => '1Di-Bari Mac-PC Services , C.A-2'] ,
-                    ['text' => 'DULCE ALMEIDA' ,
-                        'id'   => '1DULCE ALMEIDA-3'] ,
-                    ['text' => 'TAJ MAHAL BISUTERIA 54 , C.A.' ,
-                        'id'   => '1TAJ MAHAL BISUTERIA 54 , C.A.-4'] ,
-                    ['text' => 'INVERSIONES DORAL FASHION , C. A.' ,
-                        'id'   => '1INVERSIONES DORAL FASHION , C. A.-5'] ,
-                    ['text' => 'INVERSIONES EAST FASHION , S. A.' ,
-                        'id'   => '1INVERSIONES EAST FASHION , S. A.-6'] ,
-                    ['text' => 'INVERSIONES ISLAND FASHION , S. A.' ,
-                        'id'   => '1INVERSIONES ISLAND FASHION , S. A.-7'] ,
-                    ['text' => 'INVERSIONES PORLAMAR 2012 , C. A.' ,
-                        'id'   => '1INVERSIONES PORLAMAR 2012 , C. A.-8'] ,
-                    ['text' => 'INVERSIONES MCADAMS , C. A.' ,
-                        'id'   => '1INVERSIONES MCADAMS , C. A.-9'] ,
-                    ['text' => 'MANUFACTURAS MAPA MUNDI , C. A.' ,
-                        'id'   => '2MANUFACTURAS MAPA MUNDI , C. A.-0'] ,
-                    ['text' => 'PROVEEDOR PRUEBA' ,
-                        'id'   => '2PROVEEDOR PRUEBA-1'] ,
-                    ['text' => 'COLOR STORY' ,
-                        'id'   => '2COLOR STORY-2'] ,
-                    ['text' => 'POTTER SPORT' ,
-                        'id'   => '2POTTER SPORT-3'] ,
-                    ['text' => 'SILVERGATE' ,
-                        'id'   => '2SILVERGATE-4'] ,
-                    ['text' => 'TIMING' ,
-                        'id'   => '2TIMING-5'] ,
-                    ['text' => 'VIRGIN' ,
-                        'id'   => '2VIRGIN-6'] ,
-                    ['text' => 'HAVE' ,
-                        'id'   => '2HAVE-7'] ,
-                    ['text' => 'KAN CAN' ,
-                        'id'   => '2KAN CAN-8'] ,
-                    ['text' => 'ESTAM' ,
-                        'id'   => '2ESTAM-9'] ,
-                    ['text' => 'CELLO' ,
-                        'id'   => '3CELLO-0'] ,
-                    ['text' => 'LOVE STITCH' ,
-                        'id'   => '3LOVE STITCH-1'] ,
-                    ['text' => 'SILVERGATE' ,
-                        'id'   => '3SILVERGATE-2'] ,
-                    ['text' => 'TCEC' ,
-                        'id'   => '3TCEC-3'] ,
-                    ['text' => 'DO&BE' ,
-                        'id'   => '3DO&BE-4'] ,
-                    ['text' => 'MUSTARD SEED' ,
-                        'id'   => '3MUSTARD SEED-5'] ,
-                    ['text' => 'SUPERLINE' ,
-                        'id'   => '3SUPERLINE-6'] ,
-                    ['text' => 'MYSTIC INC.' ,
-                        'id'   => '3MYSTIC INC.-7'] ,
-                    ['text' => 'AMBIANCE' ,
-                        'id'   => '3AMBIANCE-8'] ,
-                    ['text' => 'MATILDA' ,
-                        'id'   => '3MATILDA-9'] ,
-                    ['text' => 'LA VI 89' ,
-                        'id'   => '4LA VI 89-0'] ,
-                    ['text' => 'CANTATA' ,
-                        'id'   => '4CANTATA-1'] ,
-                    ['text' => 'CECICO' ,
-                        'id'   => '4CECICO-2'] ,
-                    ['text' => 'ENTRO' ,
-                        'id'   => '4ENTRO-3'] ,
-                    ['text' => 'JOLIE INC' ,
-                        'id'   => '4JOLIE INC-4'] ,
-                    ['text' => 'JUST MI' ,
-                        'id'   => '4JUST MI-5'] ,
-                    ['text' => 'MUST HAVE' ,
-                        'id'   => '4MUST HAVE-6'] ,
-                    ['text' => 'FINAL TOUCH' ,
-                        'id'   => '4FINAL TOUCH-9'] ,
-                    ['text' => 'CASUAL LAN' ,
-                        'id'   => '5CASUAL LAN-0'] ,
-                    ['text' => 'FRESHINI' ,
-                        'id'   => '5FRESHINI-1'] ,
-                    ['text' => 'POEMA' ,
-                        'id'   => '5POEMA-2'] ,
-                    ['text' => 'INVERSIONES CORAL XXI , C. A.' ,
-                        'id'   => '5INVERSIONES CORAL XXI , C. A.-3'] ,
-                    ['text' => 'TRUE LOVE 2012' ,
-                        'id'   => '5TRUE LOVE 2012-4'] ,
-                    ['text' => 'INVERSIONES RISAN SRL' ,
-                        'id'   => '5INVERSIONES RISAN SRL-5'] ,
-                    ['text' => 'TONYS CLOSEOUTS' ,
-                        'id'   => '5TONYS CLOSEOUTS-6'] ,
-                    ['text' => '(DEV) INVERSIONES BANDUSH , C. A. ' ,
-                        'id'   => '5(DEV) INVERSIONES BANDUSH , C. A. -7'] ,
-                    ['text' => 'LA REINA INC' ,
-                        'id'   => '5LA REINA INC-8'] ,
-                    ['text' => 'CHOCOLATE U.S.A' ,
-                        'id'   => '5CHOCOLATE U.S.A-9'] ,
-                    ['text' => 'LULUMARI' ,
-                        'id'   => '6LULUMARI-0'] ,
-                    ['text' => 'ZINGA' ,
-                        'id'   => '6ZINGA-1'] ,
-                    ['text' => 'PINK BY ELE' ,
-                        'id'   => '6PINK BY ELE-2'] ,
-                    ['text' => 'SUNGLASES' ,
-                        'id'   => '6SUNGLASES-3'] ,
-                    ['text' => 'INVERSIONES MUR GLOBAL , C. A.' ,
-                        'id'   => '6INVERSIONES MUR GLOBAL , C. A.-4'] ,
-                    ['text' => 'INVERSIONES OCEANICA 32 , C. A.' ,
-                        'id'   => '6INVERSIONES OCEANICA 32 , C. A.-5'] ,
-                    ['text' => '(DEV) INVERSIONES CORAL XXI , C. A.' ,
-                        'id'   => '6(DEV) INVERSIONES CORAL XXI , C. A.-6'] ,
-                    ['text' => 'INVERSIONES OXANAM , C. A.' ,
-                        'id'   => '6INVERSIONES OXANAM , C. A.-7'] ,
-                    ['text' => 'MIS AVENUE' ,
-                        'id'   => '6MIS AVENUE-9'] ,
-                    ['text' => 'C. LUCE' ,
-                        'id'   => '7C. LUCE-0'] ,
-                    ['text' => 'SHOESHOP GRUP' ,
-                        'id'   => '7SHOESHOP GRUP-1'] ,
-                    ['text' => 'CECI JEWELRY , INC' ,
-                        'id'   => '7CECI JEWELRY , INC-2'] ,
-                    ['text' => 'DOUBLE ZERO INC' ,
-                        'id'   => '7DOUBLE ZERO INC-3'] ,
-                    ['text' => 'CERISE' ,
-                        'id'   => '7CERISE-4'] ,
-                    ['text' => 'NESLAY' ,
-                        'id'   => '7NESLAY-5'] ,
-                    ['text' => 'AKR&CO' ,
-                        'id'   => '7AKR&CO-6'] ,
-                    ['text' => 'CYRUS' ,
-                        'id'   => '7CYRUS-7'] ,
-                    ['text' => 'DE NOVO IMPORTS , INC.' ,
-                        'id'   => '7DE NOVO IMPORTS , INC.-8'] ,
-                    ['text' => 'GRUPO 6383615 , C. A.' ,
-                        'id'   => '7GRUPO 6383615 , C. A.-9'] ,
-                    ['text' => '(Dev) GRUPO 6383615 , C. A.' ,
-                        'id'   => '8(Dev) GRUPO 6383615 , C. A.-0'] ,
-                    ['text' => 'CHINA MARKET' ,
-                        'id'   => '8CHINA MARKET-1'] ,
-                    ['text' => 'Y&Z' ,
-                        'id'   => '8Y&Z-2'] ,
-                    ['text' => 'BCOOL' ,
-                        'id'   => '8BCOOL-3'] ,
-                    ['text' => '(dev) INVERSIONES OXANAM , CA' ,
-                        'id'   => '8(dev) INVERSIONES OXANAM , CA-4'] ,
-                    ['text' => '(dev) INVERSIONES OCEANICA 32 , C. A.' ,
-                        'id'   => '8(dev) INVERSIONES OCEANICA 32 , C. A.-5'] ,
-                    ['text' => '(dev) INVERSIONES MUR GLOBAL , C.A.' ,
-                        'id'   => '8(dev) INVERSIONES MUR GLOBAL , C.A.-6'] ,
-                    ['text' => 'JENIFER IN' ,
-                        'id'   => '8JENIFER IN-7'] ,
-                    ['text' => 'REMANENTE EXOTIK' ,
-                        'id'   => '8REMANENTE EXOTIK-8'] ,
-                    ['text' => 'SCANDAL' ,
-                        'id'   => '8SCANDAL-9'] ,
-                    ['text' => 'PHOENIX WORLD TRADE CHINA' ,
-                        'id'   => '9PHOENIX WORLD TRADE CHINA-0'] ,
-                        ] ;
-                break ;
-        }
-        return $data ;
-    }
 
 }
