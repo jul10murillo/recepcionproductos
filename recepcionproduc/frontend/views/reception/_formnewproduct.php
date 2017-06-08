@@ -26,7 +26,7 @@ $form = ActiveForm::begin(
 ?>
 <br>
 <div class="col-lg-6">
-    <?= $form->field($model,'cod_barra')?>
+    <?= $form->field($model,'cod_barra',['enableAjaxValidation' => true])->textInput()?>
     <?= $form->field($model,'departamento')->dropDownList(Yii::$app->gruduHelper->getDataDepartamento(), [
         'options' => ['placeholder' => 'Seleccionar Departamento ...'],
         'pluginOptions' => [

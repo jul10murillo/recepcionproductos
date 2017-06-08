@@ -267,9 +267,6 @@ $script = <<< JS
         $( ' #product-id_mapping ' ).val(id_mapping);
     }
      
-     
-        
-
         
 JS;
 $this->registerJs($script);

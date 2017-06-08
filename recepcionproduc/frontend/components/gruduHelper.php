@@ -294,6 +294,11 @@ class gruduHelper extends Component {
         return $marca['nombre'] ;
     }
     
+    /**
+     * 
+     * @param type $id
+     * @return type
+     */
     public function getDataProveedor($id) {
         $result = ( new Query())
                 ->select('*')

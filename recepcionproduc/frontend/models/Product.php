@@ -65,6 +65,7 @@ class Product extends \yii\db\ActiveRecord
         return [
             [['cod_barra', 'marca', 'departamento', 'seccion', 'familia', 'temporada', 'ano', 'capsula', 'color', 'cantidad', 'pvptienda', 'peso', 'serie', 'referencia', 'descripcion', 'costodist', 'pvpmgta', 'gpeso', 'coddepto', 'codseccion', 'codfamilia', 'codsubfamilia', 'codano', 'codcapsula', 'codcolor', 'codtalla', 'codprov'], 'string'],
             [['id_mapping', 'acumulado'], 'integer'],
+            ['cod_barra','unique'],
             [['subfamilia', 'talla', 'proveedor', 'carac', 'codmarca', 'codtemporada', 'descapsula'], 'string', 'max' => 255],
             [['id_mapping'], 'exist', 'skipOnError' => true, 'targetClass' => Mapping::className(), 'targetAttribute' => ['id_mapping' => 'id']],
         ];

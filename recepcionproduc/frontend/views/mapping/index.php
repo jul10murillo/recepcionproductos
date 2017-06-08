@@ -30,6 +30,7 @@ $this->params['breadcrumbs'][] = $this->title;
         ?>
             <div class="form-group">
                 <?= yii\bootstrap\Html::fileInput('archivo'); ?>
+                <small class="text-warning">*Válido sólo archivos .csv </small>    
             </div>
 
             <div class="form-group">

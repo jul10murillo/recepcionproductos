@@ -8,6 +8,8 @@
 
 ?>
 
+<?php if (isset($model->idProducto->departamento)) {
+?>
 <table class="table">
 <thead>
 	<tr>
@@ -36,3 +38,6 @@
 	</tr>
 </tbody>
 </table>
+<?php }else{
+    echo 'Producto borrado' ;
+}

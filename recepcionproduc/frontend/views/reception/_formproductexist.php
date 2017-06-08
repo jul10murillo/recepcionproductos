@@ -16,7 +16,7 @@ $urlReferencia = Url::to(['/reception/getreferencia' , 'id' => $mapping->id]) ;
 
 $form   = ActiveForm::begin(
                 [
-                    'action' => Url::to(['/reception/view', 'id' => $mapping->id]),
+//                    'action' => Url::to(['/reception/view', 'id' => $mapping->id]),
                     'type'       => ActiveForm::TYPE_HORIZONTAL ,
                     'formConfig' => ['labelSpan' => 3 , 'deviceSize' => ActiveForm::SIZE_SMALL]
                 ]
@@ -161,7 +161,7 @@ $form   = ActiveForm::begin(
 </div>
 
 <div class="form-group">
-<?= Html::submitButton('Submit' , ['class' => 'btn btn-primary btn-block','id'=>'submit']) ?>
+<?= Html::submitButton('Enviar' , ['class' => 'btn btn-primary btn-block','id'=>'submit']) ?>
 </div>
 <?php ActiveForm::end() ; 
 ?>
@@ -171,7 +171,6 @@ $urlRef = \yii\helpers\Url::to(['reception/getreferenciaajax']) ;
 $script = <<< JS
 
     $('#productexist-referencia').on('change', function(e){
-//        clearSelect();
         $.post( "$urlRef", { ref: $(this).val() })
             .done(function( data) {
                 console.log(JSON.parse( data ));

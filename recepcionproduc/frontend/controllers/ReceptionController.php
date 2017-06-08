@@ -77,6 +77,16 @@ class ReceptionController extends \yii\web\Controller {
                 \Yii::$app->end();
             }
         }
+        if (Yii::$app->request->isAjax && $newProduct->load(Yii::$app->request->post())) {
+            \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+
+            $error = json_encode(ActiveForm::validate($newProduct));
+
+            if ($error != '[]') {
+                echo $error;
+                \Yii::$app->end();
+            }
+        }
 
         if (Yii::$app->request->isPost) {
             $postnew = Yii::$app->request->post('Productnew');
@@ -181,30 +191,30 @@ class ReceptionController extends \yii\web\Controller {
 
         $data['codtemporada'] = $post['temporada'] ;
         $data['temporada']    = Yii::$app->gruduHelper->getTemporada($data['codtemporada']) ;
-        
-        $data['codano']       = $post['ano'] ;
-        $data['ano']          = Yii::$app->gruduHelper->getAno($data['codano']) ;
-        
+
+        $data['codano'] = $post['ano'] ;
+        $data['ano']    = Yii::$app->gruduHelper->getAno($data['codano']) ;
+
         $data['codcapsula'] = Yii::$app->gruduHelper->getCapsulaCod($post['capsula']) ;
         $data['capsula']    = Yii::$app->gruduHelper->getCapsula($post['capsula']) ;
-        
+
         $data['codcolor'] = $post['color'] ;
         $data['color']    = Yii::$app->gruduHelper->getColor($data['codcolor']) ;
-        
+
         $data['codtalla'] = Yii::$app->gruduHelper->getTallaCod($post['talla']) ;
         $data['talla']    = Yii::$app->gruduHelper->getTalla($post['talla']) ;
-        
+
         $data['codprov']   = $post['proveedor'] ;
         $data['proveedor'] = Yii::$app->gruduHelper->getProveedor($post['proveedor']) ;
 
-        $data['cantidad'] = ($post['cantidad']) ? $post['cantidad'] : "";
-        $data['referencia'] = isset($post['referencia']) ? $post['referencia'] : '';
-        $data['descripcion'] = $post['descripcion'];
-        $data['carac'] = $post['carac'];
-        $data['id_mapping'] = $post['id_mapping'];
-        $data['acumulado'] = 1;
+        $data['cantidad']    = ($post['cantidad']) ? $post['cantidad'] : "" ;
+        $data['referencia']  = isset($post['referencia']) ? $post['referencia'] : '' ;
+        $data['descripcion'] = $post['descripcion'] ;
+        $data['carac']       = $post['carac'] ;
+        $data['id_mapping']  = $post['id_mapping'] ;
+        $data['acumulado']   = 1 ;
 
-        return $data;
+        return $data ;
     }
 
     public function actionGetreferencia($q) {
