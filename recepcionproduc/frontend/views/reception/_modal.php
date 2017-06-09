@@ -13,6 +13,7 @@ Modal::begin([
     'size'   => Modal::SIZE_LARGE
 ]) ;
 
+$marca = \app\models\Marca::findOne($mapping->id_marca);
 echo Tabs::widget([
     'items' => [
         [
@@ -20,7 +21,8 @@ echo Tabs::widget([
             'content' => $this->render('_formnewproduct',[
                             'model' => $newProduct,
                             'dataProveedor' => $dataProveedor,
-                            'mapping' => $mapping
+                            'mapping' => $mapping,
+                            'marca'=>$marca
                         ]),
             'active' => true
         ],
@@ -29,7 +31,8 @@ echo Tabs::widget([
             'content' => $this->render('_formproductexist',[
                             'model' => $newProduct1,
                             'dataProveedor' => $dataProveedor,
-                            'mapping' => $mapping
+                            'mapping' => $mapping,
+                            'marca'=>$marca
                         ]),
         ],
     ],

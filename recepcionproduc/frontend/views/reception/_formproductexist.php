@@ -14,6 +14,7 @@ use yii\widgets\Pjax ;
 $urlFamilia    = Url::to(['/reception/getFamilia']) ;
 $urlReferencia = Url::to(['/reception/getreferencia' , 'id' => $mapping->id]) ;
 
+
 $form   = ActiveForm::begin(
                 [
 //                    'action' => Url::to(['/reception/view', 'id' => $mapping->id]),
@@ -99,7 +100,7 @@ $form   = ActiveForm::begin(
     <?= $form->field($model , 'carac')->textInput(['id' => 'carac','readonly' => true ]) ?>
 </div>
 <div class="col-lg-6">
-    <?= $form->field($model , 'marca')->textInput(['readonly' => true , 'value' => strtoupper($mapping->marca),'id' => 'marca']) ?>
+    <?= $form->field($model , 'marca')->textInput(['readonly' => true , 'value' => strtoupper($marca->nombre),'id' => 'marca']) ?>
     <?=
     $form->field($model , 'seccion')->dropDownList(Yii::$app->gruduHelper->getDataSeccion() , [
         'options'  => ['placeholder' => 'Seleccionar Sección ...'] ,

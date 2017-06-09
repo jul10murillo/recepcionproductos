@@ -510,6 +510,17 @@ class gruduHelper extends Component {
      * @param type $param
      */
     public function setLog($param) {
+        if (isset($param['id_mapping']))
+        {
+            $mapping = \app\models\Mapping::findOne($param['id_mapping']);
+        }
+        if (isset($param['id_producto']))
+        {
+            $product = \app\models\Product::findOne($param['id_producto']);
+        }
+        
+        
+        
         $data = [
             'id_user' => Yii::$app->user->id,
             'operacion' => $param['operacion'],
@@ -518,6 +529,9 @@ class gruduHelper extends Component {
             'id_producto' => isset($param['id_producto']) ? $param['id_producto'] : '',
             'acumulado' => isset($param['acumulado']) ? $param['acumulado'] : '',
             'cantidad' => isset($param['cantidad']) ? $param['cantidad'] : '',
+            'cod_barra'=>isset($product->cod_barra) ? $product->cod_barra :'' ,
+            'referencia'=> isset($product->referencia) ? $product->referencia :'',
+            'archivo'=> isset($mapping->archivo)?$mapping->archivo:'',
         ];
         $log = new Log();
         $log->attributes = $data;

@@ -21,7 +21,7 @@ ExportMenu::widget([
     'dataProvider' => $dataProvider ,
     'columns'      => [
         'idUser.username' ,
-        'idMapping.archivo' ,
+        'archivo' ,
         'operacion' ,
         'fecha' ,
     ] ,
@@ -44,7 +44,7 @@ GridView::widget([
     'dataProvider'  => $dataProvider ,
     'columns'       => [
         'idUser.username' ,
-        'idMapping.archivo' ,
+        'archivo' ,
         'operacion' ,
         'fecha' ,
     ] ,

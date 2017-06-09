@@ -3,7 +3,6 @@
 namespace app\models;
 
 use Yii;
-use common\models\User;
 
 /**
  * This is the model class for table "log".
@@ -16,9 +15,10 @@ use common\models\User;
  * @property integer $id_producto
  * @property integer $acumulado
  * @property integer $cantidad
+ * @property integer $cod_barra
+ * @property string $referencia
+ * @property string $archivo
  *
- * @property Mapping $idMapping
- * @property Product $idProducto
  * @property User $idUser
  */
 class Log extends \yii\db\ActiveRecord
@@ -37,13 +37,11 @@ class Log extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id_user', 'operacion', 'id_mapping', 'fecha'], 'required'],
-            [['id_user', 'id_mapping', 'id_producto', 'acumulado', 'cantidad'], 'integer'],
-            [['operacion'], 'string'],
+            [['id_user', 'operacion', 'id_mapping'], 'required'],
+            [['id_user', 'id_mapping', 'id_producto', 'acumulado', 'cantidad', 'cod_barra'], 'integer'],
+            [['operacion', 'referencia', 'archivo'], 'string'],
             [['fecha'], 'safe'],
-            [['id_mapping'], 'exist', 'skipOnError' => true, 'targetClass' => Mapping::className(), 'targetAttribute' => ['id_mapping' => 'id']],
-            [['id_producto'], 'exist', 'skipOnError' => true, 'targetClass' => Product::className(), 'targetAttribute' => ['id_producto' => 'id']],
-            [['id_user'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['id_user' => 'id']],
+            [['id_user'], 'exist', 'skipOnError' => true, 'targetClass' => \common\models\User::className(), 'targetAttribute' => ['id_user' => 'id']],
         ];
     }
 
@@ -61,23 +59,10 @@ class Log extends \yii\db\ActiveRecord
             'id_producto' => 'Id Producto',
             'acumulado' => 'Acumulado',
             'cantidad' => 'Cantidad',
+            'cod_barra' => 'Cod Barra',
+            'referencia' => 'Referencia',
+            'archivo' => 'Archivo',
         ];
-    }
-
-    /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getIdMapping()
-    {
-        return $this->hasOne(Mapping::className(), ['id' => 'id_mapping']);
-    }
-
-    /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getIdProducto()
-    {
-        return $this->hasOne(Product::className(), ['id' => 'id_producto']);
     }
 
     /**
@@ -85,6 +70,6 @@ class Log extends \yii\db\ActiveRecord
      */
     public function getIdUser()
     {
-        return $this->hasOne(User::className(), ['id' => 'id_user']);
+        return $this->hasOne(\common\models\User::className(), ['id' => 'id_user']);
     }
 }

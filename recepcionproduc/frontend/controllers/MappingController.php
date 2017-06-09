@@ -94,10 +94,10 @@ class MappingController extends \yii\web\Controller
         $model    = new Mapping() ;
         if (Yii::$app->request->post() ) {
             $valBrand = $_POST['M'] ;
-            $brand    = Yii::$app->gruduHelper->setBrand($valBrand) ;
+            
             $post  = Yii::$app->request->post('Mapping');
             $post['fecha'] = date ("Y-m-d", strtotime(Yii::$app->request->post('Mapping')['fecha']));
-            $post['marca'] = $brand;
+            $post['id_marca'] = $valBrand;
             $model->attributes = $post;
             if ($model->validate() && $model->save()) {
                 $id = $model->id;

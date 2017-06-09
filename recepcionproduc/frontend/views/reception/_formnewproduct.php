@@ -62,7 +62,7 @@ $form = ActiveForm::begin(
     <?= $form->field($model,'carac') ?>
 </div>
 <div class="col-lg-6">
-    <?= $form->field($model,'marca')->textInput(['readonly' => true,'value'=>strtoupper($mapping->marca)]) ?>
+    <?= $form->field($model,'marca')->textInput(['readonly' => true,'value'=>strtoupper($marca->nombre)]) ?>
     <?= $form->field($model,'seccion')->dropDownList(Yii::$app->gruduHelper->getDataSeccion(), [
         'options' => ['placeholder' => 'Seleccionar Sección ...'],
         'onchange'=>'

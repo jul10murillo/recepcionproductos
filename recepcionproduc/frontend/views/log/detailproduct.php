@@ -5,10 +5,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
+$product = app\models\Product::findOne($model['id_producto']);
 
 ?>
 
-<?php if (isset($model->idProducto->departamento)) {
+<?php if (isset($product)) {
 ?>
 <table class="table">
 <thead>
@@ -26,15 +27,15 @@
 </thead>
 <tbody>
 	<tr>
-		<td><?= $model->idProducto->departamento?></td>
-		<td><?= $model->idProducto->seccion?></td>
-		<td><?= $model->idProducto->familia?></td>
-		<td><?= $model->idProducto->subfamilia?></td>
-		<td><?= $model->idProducto->temporada?></td>
-		<td><?= $model->idProducto->ano?></td>
-		<td><?= $model->idProducto->capsula?></td>
-		<td><?= $model->idProducto->talla?></td>
-		<td><?= $model->idProducto->color?></td>
+		<td><?= $product->departamento?></td>
+		<td><?= $product->seccion?></td>
+		<td><?= $product->familia?></td>
+		<td><?= $product->subfamilia?></td>
+		<td><?= $product->temporada?></td>
+		<td><?= $product->ano?></td>
+		<td><?= $product->capsula?></td>
+		<td><?= $product->talla?></td>
+		<td><?= $product->color?></td>
 	</tr>
 </tbody>
 </table>

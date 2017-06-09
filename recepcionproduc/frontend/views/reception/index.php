@@ -18,7 +18,7 @@ $this->params['breadcrumbs'][] = $this->title ;
 GridView::widget([
     'dataProvider' => $dataProvider,
     'columns'      => [
-        'marca',
+        'idMarca.nombre',
         'fecha',
         'tipo',
         'archivo',
@@ -43,51 +43,7 @@ GridView::widget([
             'buttons'       => [
                 'export' => function ($url, $model) {
 //                    $dataProvider = new ActiveDataProvider([
-//                        'query' => Product::find()->where(['id_mapping' => $model->id]),
-//                            ]) ;
-//
-//                    return ExportMenu::widget([
-//                                'dataProvider' => $dataProvider,
-//                                'columns'      => [
-//                                    'cod_barra',
-//                                    'marca',
-//                                    'departamento',
-//                                    'seccion',
-//                                    'familia',
-//                                    'subfamilia',
-//                                    'temporada',
-//                                    'ano',
-//                                    'capsula',
-//                                    'color',
-//                                    'talla',
-//                                    'proveedor',
-//                                    'cantidad',
-//                                    'pvptienda',
-//                                    'peso',
-//                                    'serie',
-//                                    'referencia',
-//                                    'descripcion',
-//                                    'costodist',
-//                                    'pvpmgta',
-//                                    'carac',
-//                                    'gpeso',
-//                                    'codmarca',
-//                                    'coddepto',
-//                                    'codseccion',
-//                                    'codfamilia',
-//                                    'codsubfamilia',
-//                                    'codtemporada',
-//                                    'codano',
-//                                    'codcapsula',
-//                                    'codcolor',
-//                                    'codtalla',
-//                                    'codprov',
-//                                    'descapsula',
-//                                    'acumulado'
-//                                ],
-//                                'fontAwesome'  => true,
-//                            ]) ;
-//                    ;
+
                     return Html::a('<i class="glyphicon glyphicon-save-file"></i>', Url::to(['/reception/export','id'=>$model->id]),['title'=>'Exportar']);
                 }
             ]

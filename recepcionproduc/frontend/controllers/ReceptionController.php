@@ -62,7 +62,7 @@ class ReceptionController extends \yii\web\Controller {
         $newProduct  = new Productnew ;
         $newProduct1 = new \app\models\Productexist ;
 
-        $dataProveedor = Yii::$app->gruduHelper->getDataProveedor($id) ;
+        $dataProveedor = Yii::$app->gruduHelper->getDataProveedor($mapping->id_marca) ;
 
         $sumProduct  = Product::find()->where(['id_mapping' => $id])->sum('cantidad') ;
         $acumProduct = Product::find()->where(['id_mapping' => $id])->sum('acumulado') ;
@@ -258,6 +258,12 @@ class ReceptionController extends \yii\web\Controller {
                 ->db
                 ->createCommand()
                 ->delete('product', ['id_mapping' => $id])
+                ->execute() ;
+        
+        Yii::$app
+                ->db
+                ->createCommand()
+                ->delete('mapping_header', ['id_mapping' => $id])
                 ->execute() ;
 
         Yii::$app

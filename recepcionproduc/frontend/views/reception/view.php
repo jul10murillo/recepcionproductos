@@ -156,6 +156,7 @@ $form = ActiveForm::begin(
 <?php Modal::end(); ?>
 
 <?php
+$marca = \app\models\Marca::findOne($mapping->id_marca);
 $urlPost = Url::to(['/reception/post-acum']);
 $script = <<< JS
     $( document ).ready(function() {
@@ -178,7 +179,7 @@ $script = <<< JS
                             $(".alert").slideUp(500);
                         });
                         cod_barra = $( "#cod_bar" ).val();
-                        setDataModal( cod_barra, "$mapping->marca", "$mapping->id");
+                        setDataModal( cod_barra, "$marca->nombre", "$mapping->id");
 
                     } else if (data === '1') {
                         $(".alert-danger").alert();
