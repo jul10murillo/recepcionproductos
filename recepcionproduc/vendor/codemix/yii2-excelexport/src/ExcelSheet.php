@@ -15,7 +15,8 @@ class ExcelSheet extends Object
     protected $_formats;
     protected $_formatters;
     protected $_callbacks;
-    protected $_row = 1;
+    protected $_row = 3;
+    protected $_idmapping;
 
     /**
      * @param PHPExcel_WorkSheet $sheet
@@ -38,6 +39,14 @@ class ExcelSheet extends Object
     /**
      * @return array|\Iterator the data for the rows of the sheet
      */
+    public function getIdmapping()
+    {
+        return $this->_idmapping;
+    }
+    
+    /**
+     * @return array|\Iterator the data for the rows of the sheet
+     */
     public function getData()
     {
         return $this->_data;
@@ -49,6 +58,11 @@ class ExcelSheet extends Object
     public function setData($value)
     {
         $this->_data = $value;
+    }
+    
+    public function setIdmapping($value)
+    {
+        $this->_idmapping = $value;
     }
 
     /**
@@ -172,8 +186,15 @@ class ExcelSheet extends Object
         $formatters = self::normalizeIndex($this->getFormatters());
         $callbacks = self::normalizeIndex($this->getCallbacks());
         $types = self::normalizeIndex($this->getTypes());
-
+        
+        $mapping = \app\models\MappingHeader::find()->where(['id_mapping'=> $this->getIdmapping()])->one();
+        $data    = $mapping->attributes;
+        $data['id'] = '';
+        $data['id_mapping'] = '';
+        $this->renderRow($data, 1 , $formats, $formatters, $callbacks, $types);
+        
         foreach ($this->getData() as $data) {
+            
             $this->renderRow($data, $this->_row++, $formats, $formatters, $callbacks, $types);
         }
     }
@@ -190,6 +211,7 @@ class ExcelSheet extends Object
      */
     protected function renderRow($data, $row, $formats, $formatters, $callbacks, $types)
     {
+//        print_r(array_values($data));exit;
         foreach (array_values($data) as $i => $value) {
             if (isset($formatters[$i]) && is_callable($formatters[$i])) {
                 $value = call_user_func($formatters[$i], $value, $row, $data);

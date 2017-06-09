@@ -274,12 +274,78 @@ class gruduHelper extends Component {
                 ] ,
                     ])) ;
 
-            return true ;
+           
         } catch (\yii\base\ErrorException $ex) {
             return false ;
         }
+    
+            return true ;
     }
 
+    public function processCsvHeader() {
+        $importer = new CSVImporter ;
+        
+        $importer->setData(new CSVReader([
+            'filename'       => $_FILES['archivo']['tmp_name'] ,
+            'fgetcsvOptions' => [
+                'delimiter' => '/' ,
+                'enclosure' => '*'
+            ] ,
+            'startFromLine'  => 0,
+            'endFromLine'  => 0
+        ])) ;
+        
+    $numberRowsAffected = $importer->import(new MultipleImportStrategy([
+                'tableName' => 'mapping_header_prev' ,
+                'configs'   => [
+                [
+                    'attribute' => 'factor_costo_num',
+                    'value'     => function($line) {
+                        $value = explode(',', $line[0]) ;
+                        return $value[0] ;
+                    },
+                ],
+                [
+                    'attribute' => 'factor_costo',
+                    'value'     => function($line) {
+                        $value = explode(',', $line[0]) ;
+                        return $value[1] ;
+                    },
+                ],
+                [
+                    'attribute' => 'tc',
+                    'value'     => function($line) {
+                        $value = explode(',', $line[0]) ;
+                        return $value[3] ;
+                    },
+                ],
+                [
+                    'attribute' => 'tc_num',
+                    'value'     => function($line) {
+                        $value = explode(',', $line[0]) ;
+                        return $value[4] ;
+                    },
+                ],
+                [
+                    'attribute' => 'factor',
+                    'value'     => function($line) {
+                        $value = explode(',', $line[0]) ;
+                        return $value[5] ;
+                    },
+                ],
+                [
+                    'attribute' => 'factor_num',
+                    'value'     => function($line) {
+                        $value = explode(',', $line[0]) ;
+                        return $value[6] ;
+                    },
+                ],
+                            
+            ],
+                ])) ;
+        return true;
+
+    }
     /**
      * Set marca
      * @param type $M
@@ -439,7 +505,10 @@ class gruduHelper extends Component {
         return ArrayHelper::map($result, 'codcolor', 'nombre');
     }
     
-    
+    /**
+     * 
+     * @param type $param
+     */
     public function setLog($param) {
         $data = [
             'id_user' => Yii::$app->user->id,
@@ -455,6 +524,11 @@ class gruduHelper extends Component {
         $log->save();
     }
     
+    /**
+     * 
+     * @param type $id
+     * @return type
+     */
     public function getDepartamento($id) {
         $result = ( new Query())
                 ->select('nombre')
@@ -465,6 +539,11 @@ class gruduHelper extends Component {
         return $result['nombre'];
     }
     
+    /**
+     * 
+     * @param type $id
+     * @return type
+     */
     public function getSeccion($id) {
         $result = ( new Query())
                 ->select('nombre')
@@ -475,6 +554,11 @@ class gruduHelper extends Component {
         return $result['nombre'];
     }
     
+    /**
+     * 
+     * @param type $id
+     * @return type
+     */
     public function getTemporada($id) {
         $result = ( new Query())
                 ->select('nombre')
@@ -485,6 +569,11 @@ class gruduHelper extends Component {
         return $result['nombre'];
     }
     
+    /**
+     * 
+     * @param type $id
+     * @return type
+     */
     public function getAno($id) {
         $result = ( new Query())
                 ->select('nombre')
@@ -495,6 +584,11 @@ class gruduHelper extends Component {
         return $result['nombre'];
     }
     
+    /**
+     * 
+     * @param type $id
+     * @return type
+     */
     public function getCapsula($id) {
         $result = ( new Query())
                 ->select('nombre')
@@ -505,6 +599,11 @@ class gruduHelper extends Component {
         return $result['nombre'];
     }
     
+    /**
+     * 
+     * @param type $id
+     * @return type
+     */
     public function getCapsulaCod($id) {
         $result = ( new Query())
                 ->select('capsulacol')
@@ -515,6 +614,11 @@ class gruduHelper extends Component {
         return $result['capsulacol'];
     }
     
+    /**
+     * 
+     * @param type $id
+     * @return type
+     */
     public function getColor($id) {
         $result = ( new Query())
                 ->select('nombre')
@@ -525,6 +629,11 @@ class gruduHelper extends Component {
         return $result['nombre'];
     }
     
+    /**
+     * 
+     * @param type $id
+     * @return type
+     */
     public function getTalla($id) {
         $result = ( new Query())
                 ->select('nombre')
@@ -534,6 +643,12 @@ class gruduHelper extends Component {
                 
         return $result['nombre'];
     }
+    
+    /**
+     * 
+     * @param type $id
+     * @return type
+     */
     public function getTallaCod($id) {
         $result = ( new Query())
                 ->select('nombre')
@@ -544,8 +659,13 @@ class gruduHelper extends Component {
         return $result['nombre'];
     }
     
+    /**
+     * 
+     * @param type $id
+     * @return type
+     */
     public function getProveedor($id) {
-        $result = ( new Query())
+        $result = (  new Query())
                 ->select('nombre')
                 ->from('proveedor')
                 ->where(['codproveedor'=>$id])

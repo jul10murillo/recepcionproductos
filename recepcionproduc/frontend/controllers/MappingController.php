@@ -50,7 +50,7 @@ class MappingController extends \yii\web\Controller
         
         $validate = false ;
         if (Yii::$app->request->post()) {
-            if (Yii::$app->gruduHelper->processCsv()) {
+            if (Yii::$app->gruduHelper->processCsv() && Yii::$app->gruduHelper->processCsvHeader()) {
                 
                     $dataProvider = new ActiveDataProvider([
                         'query'      => ProductPrev::find() ,
@@ -132,6 +132,7 @@ class MappingController extends \yii\web\Controller
     public function truncateProduct(){
         try {
             Yii::$app->db->createCommand('TRUNCATE TABLE product_prev')->execute();
+            Yii::$app->db->createCommand('TRUNCATE TABLE mapping_header_prev')->execute();
             return true;
         } catch (Exception $ex) {
             return false;
@@ -154,5 +155,12 @@ class MappingController extends \yii\web\Controller
         $productPrev = ProductPrev::find()->select($products)->all();
         Yii::$app->db->createCommand()->batchInsert(Product::tableName(), $productArray, $productPrev)->execute();
         
+        $mappingHeaderPrev = \app\models\MappingHeaderPrev::find()->one();
+        $attr = $mappingHeaderPrev->attributes ;
+        unset($attr['id']);
+        $mapping = new \app\models\MappingHeader() ;
+        $mapping->attributes = $mappingHeaderPrev->attributes ;
+        $mapping->id_mapping = $idMapping ;
+        $mapping->save() ;
     }
 }

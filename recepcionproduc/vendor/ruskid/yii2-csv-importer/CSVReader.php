@@ -32,7 +32,12 @@ class CSVReader {
      * @var integer
      */
     public $startFromLine = 1;
-
+    
+    /**
+     * Linea que termina archivo csv 
+     * @var integer
+     */
+    public $endFromLine = null;
     /**
      * @throws Exception
      */
@@ -76,6 +81,18 @@ class CSVReader {
         for ($i = 0; $i < $this->startFromLine; $i++) {
             unset($lines[$i]);
         }
+        
+        if ( !is_null($this->endFromLine) )
+        {
+            foreach ($lines as $key => $value) {
+                if ($key > $this->endFromLine )
+                {
+                    unset($lines[$key]);
+                }
+            }
+            
+        }
+        
         return $lines;
     }
 
