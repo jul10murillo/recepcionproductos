@@ -1,0 +1,4 @@
+class_name: TestTester
+modules:
+    enabled:
+        - \frontend\tests\Helper\Test

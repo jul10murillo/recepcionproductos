@@ -1,0 +1,4 @@
+class_name: TestGuy
+modules:
+    enabled:
+        - \Helper\Test

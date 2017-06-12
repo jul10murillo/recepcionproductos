@@ -165,4 +165,13 @@ return array (
       '@codemix/excelexport' => $vendorDir . '/codemix/yii2-excelexport/src',
     ),
   ),
+  'yiisoft/yii2-codeception' => 
+  array (
+    'name' => 'yiisoft/yii2-codeception',
+    'version' => '2.0.6.0',
+    'alias' => 
+    array (
+      '@yii/codeception' => $vendorDir . '/yiisoft/yii2-codeception',
+    ),
+  ),
 );

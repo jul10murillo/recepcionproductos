@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-param" content="_csrf-frontend">
+    <meta name="csrf-token" content="WGtnbGdJYzA6X145IiAJWTNTCloPcDVCbgE4Pg8IMlEJXj0UFDkHdw==">
+    <title>Contact</title>
+    <link href="/assets/85e0b6e0/css/bootstrap.css" rel="stylesheet">
+<link href="/css/site.css" rel="stylesheet">
+<link href="/css/dumit.css" rel="stylesheet"></head>
+<body>
+
+<div class="wrap">
+    <nav id="w15" class="navbar-inverse navbar-fixed-top navbar" role="navigation"><div class="container"><div class="navbar-header"><button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#w15-collapse"><span class="sr-only">Toggle navigation</span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span></button><a class="navbar-brand" href="/index-test.php">Recepción de Productos</a></div><div id="w15-collapse" class="collapse navbar-collapse"><ul id="w16" class="navbar-nav navbar-right nav"><li><a href="/index-test.php?r=site%2Fsignup">Registrarse</a></li>
+<li><a href="/index-test.php?r=site%2Flogin">Ingresar</a></li></ul></div></div></nav>
+    <div class="container">
+        <ul class="breadcrumb"><li><a href="/index-test.php">Inicio</a></li>
+<li class="active">Contact</li>
+</ul>                <div class="site-contact">
+    <h1>Contact</h1>
+
+    <p>
+        If you have business inquiries or other questions, please fill out the following form to contact us. Thank you.
+    </p>
+
+    <div class="row">
+        <div class="col-lg-5">
+            <form id="contact-form" action="/index-test.php?r=site%2Fcontact" method="post" role="form">
+<input type="hidden" name="_csrf-frontend" value="WGtnbGdJYzA6X145IiAJWTNTCloPcDVCbgE4Pg8IMlEJXj0UFDkHdw==">
+                <div class="form-group field-contactform-name required">
+<label class="control-label" for="contactform-name">Name</label>
+<input type="text" id="contactform-name" class="form-control" name="ContactForm[name]" value="tester" autofocus aria-required="true">
+
+<p class="help-block help-block-error"></p>
+</div>
+                <div class="form-group field-contactform-email required has-error">
+<label class="control-label" for="contactform-email">Email</label>
+<input type="text" id="contactform-email" class="form-control" name="ContactForm[email]" value="tester.email" aria-required="true" aria-invalid="true">
+
+<p class="help-block help-block-error">Email no es una dirección de correo válida.</p>
+</div>
+                <div class="form-group field-contactform-subject required">
+<label class="control-label" for="contactform-subject">Subject</label>
+<input type="text" id="contactform-subject" class="form-control" name="ContactForm[subject]" value="test subject" aria-required="true">
+
+<p class="help-block help-block-error"></p>
+</div>
+                <div class="form-group field-contactform-body required">
+<label class="control-label" for="contactform-body">Body</label>
+<textarea id="contactform-body" class="form-control" name="ContactForm[body]" rows="6" aria-required="true">test content</textarea>
+
+<p class="help-block help-block-error"></p>
+</div>
+                <div class="form-group field-contactform-verifycode">
+<label class="control-label" for="contactform-verifycode">Verification Code</label>
+<div class="row"><div class="col-lg-3"><img id="contactform-verifycode-image" src="/index-test.php?r=site%2Fcaptcha&amp;v=593e962672974" alt=""></div><div class="col-lg-6"><input type="text" id="contactform-verifycode" class="form-control" name="ContactForm[verifyCode]" value="testme"></div></div>
+
+<p class="help-block help-block-error"></p>
+</div>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary" name="contact-button">Submit</button>                </div>
+
+            </form>        </div>
+    </div>
+
+</div>
+    </div>
+</div>
+
+<footer class="footer">
+    <div class="container">
+        <p class="pull-left">&copy; Grupo Dumit 2017</p>
+    </div>
+</footer>
+
+<script src="/assets/8639cc49/jquery.js"></script>
+<script src="/assets/b3aff9cf/yii.js"></script>
+<script src="/assets/b3aff9cf/yii.validation.js"></script>
+<script src="/assets/b3aff9cf/yii.captcha.js"></script>
+<script src="/assets/b3aff9cf/yii.activeForm.js"></script>
+<script src="/assets/85e0b6e0/js/bootstrap.js"></script>
+<script type="text/javascript">jQuery(document).ready(function () {
+jQuery('#contactform-verifycode-image').yiiCaptcha({"refreshUrl":"\/index-test.php?r=site%2Fcaptcha\u0026refresh=1","hashKey":"yiiCaptcha\/site\/captcha"});
+jQuery('#contact-form').yiiActiveForm([{"id":"contactform-name","name":"name","container":".field-contactform-name","input":"#contactform-name","error":".help-block.help-block-error","validate":function (attribute, value, messages, deferred, $form) {yii.validation.required(value, messages, {"message":"Name no puede estar vacío."});}},{"id":"contactform-email","name":"email","container":".field-contactform-email","input":"#contactform-email","error":".help-block.help-block-error","validate":function (attribute, value, messages, deferred, $form) {yii.validation.required(value, messages, {"message":"Email no puede estar vacío."});yii.validation.email(value, messages, {"pattern":/^[a-zA-Z0-9!#$%&'*+\/=?^_`{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+\/=?^_`{|}~-]+)*@(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?$/,"fullPattern":/^[^@]*<[a-zA-Z0-9!#$%&'*+\/=?^_`{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+\/=?^_`{|}~-]+)*@(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?>$/,"allowName":false,"message":"Email no es una dirección de correo válida.","enableIDN":false,"skipOnEmpty":1});}},{"id":"contactform-subject","name":"subject","container":".field-contactform-subject","input":"#contactform-subject","error":".help-block.help-block-error","validate":function (attribute, value, messages, deferred, $form) {yii.validation.required(value, messages, {"message":"Subject no puede estar vacío."});}},{"id":"contactform-body","name":"body","container":".field-contactform-body","input":"#contactform-body","error":".help-block.help-block-error","validate":function (attribute, value, messages, deferred, $form) {yii.validation.required(value, messages, {"message":"Body no puede estar vacío."});}},{"id":"contactform-verifycode","name":"verifyCode","container":".field-contactform-verifycode","input":"#contactform-verifycode","error":".help-block.help-block-error","validate":function (attribute, value, messages, deferred, $form) {yii.validation.captcha(value, messages, {"hash":658,"hashKey":"yiiCaptcha/site/captcha","caseSensitive":false,"message":"El código de verificación es incorrecto."});}}], []);
+});</script></body>
+</html>

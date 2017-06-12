@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-param" content="_csrf-frontend">
+    <meta name="csrf-token" content="TDNsZjR4MmY7WTwyU09cBR98FRJXPHAfOX8eAkdNCj40WhgTeA9EKw==">
+    <title>About</title>
+    <link href="/assets/85e0b6e0/css/bootstrap.css" rel="stylesheet">
+<link href="/css/site.css" rel="stylesheet">
+<link href="/css/dumit.css" rel="stylesheet"></head>
+<body>
+
+<div class="wrap">
+    <nav id="w0" class="navbar-inverse navbar-fixed-top navbar" role="navigation"><div class="container"><div class="navbar-header"><button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#w0-collapse"><span class="sr-only">Toggle navigation</span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span></button><a class="navbar-brand" href="/index-test.php">Recepción de Productos</a></div><div id="w0-collapse" class="collapse navbar-collapse"><ul id="w1" class="navbar-nav navbar-right nav"><li><a href="/index-test.php?r=site%2Fsignup">Registrarse</a></li>
+<li><a href="/index-test.php?r=site%2Flogin">Ingresar</a></li></ul></div></div></nav>
+    <div class="container">
+        <ul class="breadcrumb"><li><a href="/index-test.php">Inicio</a></li>
+<li class="active">About</li>
+</ul>                <div class="site-about">
+    <form id="csv-form" action="/index-test.php?r=site%2Fabout" method="post" enctype="multipart/form-data">
+<input type="hidden" name="_csrf-frontend" value="TDNsZjR4MmY7WTwyU09cBR98FRJXPHAfOX8eAkdNCj40WhgTeA9EKw==">
+                <div class="form-group field-csvform-file_csv required">
+<label class="control-label" for="csvform-file_csv">Archivo CSV</label>
+<input type="hidden" name="CsvForm[file_csv]" value=""><input type="file" id="csvform-file_csv" name="CsvForm[file_csv]" aria-required="true">
+
+<div class="help-block"></div>
+</div>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary" name="contact-button">Submit</button>                </div>
+
+    </form></div>
+    </div>
+</div>
+
+<footer class="footer">
+    <div class="container">
+        <p class="pull-left">&copy; Grupo Dumit 2017</p>
+    </div>
+</footer>
+
+<script src="/assets/8639cc49/jquery.js"></script>
+<script src="/assets/b3aff9cf/yii.js"></script>
+<script src="/assets/b3aff9cf/yii.validation.js"></script>
+<script src="/assets/b3aff9cf/yii.activeForm.js"></script>
+<script src="/assets/85e0b6e0/js/bootstrap.js"></script>
+<script type="text/javascript">jQuery(document).ready(function () {
+jQuery('#csv-form').yiiActiveForm([{"id":"csvform-file_csv","name":"file_csv","container":".field-csvform-file_csv","input":"#csvform-file_csv","validate":function (attribute, value, messages, deferred, $form) {yii.validation.required(value, messages, {"message":"Archivo CSV no puede estar vacío."});yii.validation.file(attribute, messages, {"message":"Falló la subida del archivo.","skipOnEmpty":false,"uploadRequired":"Por favor suba un archivo.","mimeTypes":[],"wrongMimeType":"Sólo se aceptan archivos con los siguientes tipos MIME: .","extensions":["xls","csv"],"wrongExtension":"Sólo se aceptan archivos con las siguientes extensiones: xls, csv","maxFiles":1,"tooMany":"Puedes subir como máximo 1 archivo."});}}], []);
+});</script></body>
+</html>

@@ -26,7 +26,8 @@
         "kartik-v/yii2-widget-fileinput": "@dev",
         "kartik-v/yii2-widget-select2": "@dev",
         "kartik-v/yii2-widget-activeform": "@dev",
-        "codemix/yii2-excelexport": "^2.0"
+        "codemix/yii2-excelexport": "^2.0",
+        "yiisoft/yii2-codeception": "^2.0"
     },
     "require-dev": {
         "yiisoft/yii2-debug": "~2.0.0",
