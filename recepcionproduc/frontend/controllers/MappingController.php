@@ -43,10 +43,20 @@ class MappingController extends \yii\web\Controller
     {
         $this->truncateProduct();
         $model = new Mapping() ;
+        $cvsModel = new \frontend\models\CsvForm();
         
         $dataProvider = new ActiveDataProvider([
             'query'      => ProductPrev::find(),
         ]) ;
+        
+        if (isset($_GET['M']))
+        {
+            $marcaData = \app\models\Marca::findOne($_GET['M']);
+            $marca     = $marcaData->nombre;
+        } else
+        {
+            $marca     = "Debe elegir Marca";
+        }
         
         $validate = false ;
         if (Yii::$app->request->post()) {
@@ -57,13 +67,19 @@ class MappingController extends \yii\web\Controller
                         'pagination'      => false ,
                     ]) ;
                     
+                    $query = (new \yii\db\Query())->from('product_prev');
+                    $sum = $query->sum('cantidad');
+                    
                     $validate = true ;
-                    $name = $_FILES['archivo']['name'];
+                    $name = $_FILES['CsvForm']['name']['file_csv'];
                     return $this->render('index' , [
                             'model'        => $model ,
+                            'cvsModel'     => $cvsModel,
                             'dataProvider' => $dataProvider ,
                             'validate'     => $validate,
-                            'name'         => $name
+                            'name'         => $name,
+                            'marca'        => $marca,
+                            'sum'          => $sum
                         ]) ;
             }else{
                 Yii::$app->session->setFlash('danger', "Ha ocurrido un error en la carga");
@@ -73,8 +89,10 @@ class MappingController extends \yii\web\Controller
 
         return $this->render('index' , [
                     'model'        => $model ,
+                    'cvsModel'        => $cvsModel ,
                     'dataProvider' => $dataProvider ,
-                    'validate'     => $validate
+                    'validate'     => $validate,
+                    'marca'        => $marca
                 ]) ;
     }
     

@@ -20,7 +20,7 @@ class gruduHelper extends Component {
         $importer = new CSVImporter ;
 
         $importer->setData(new CSVReader([
-            'filename'       => $_FILES['archivo']['tmp_name'] ,
+            'filename'       => $_FILES['CsvForm']['tmp_name']['file_csv'] ,
             'fgetcsvOptions' => [
                 'delimiter' => '/' ,
                 'enclosure' => '*'
@@ -286,7 +286,7 @@ class gruduHelper extends Component {
         $importer = new CSVImporter ;
         
         $importer->setData(new CSVReader([
-            'filename'       => $_FILES['archivo']['tmp_name'] ,
+            'filename'       => $_FILES['CsvForm']['tmp_name']['file_csv'] ,
             'fgetcsvOptions' => [
                 'delimiter' => '/' ,
                 'enclosure' => '*'

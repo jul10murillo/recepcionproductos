@@ -32,33 +32,26 @@ class LogController extends \yii\web\Controller
     }
     
     public function actionIndex() {
-        $dataProvider = new ActiveDataProvider([
-            'query' => Log::find()->where(['not', ['id_producto' => null]]) ,
-            'sort' => [
-                'defaultOrder' => [
-                    'fecha' => SORT_DESC
-                ]
-            ],
-            ]) ;
-
+        $user = new \common\models\User();
+        $searchModel = new \app\models\LogSearch();
+        $dataProvider = $searchModel->search(\Yii::$app->request->get());
         return $this->render('index' , [
-                    'dataProvider' => $dataProvider
+                    'dataProvider' => $dataProvider,
+                    'searchModel' => $searchModel,
+                    'user' => $user
                 ]) ;
         
     }
     public function actionCharge() {
-        $dataProvider = new ActiveDataProvider([
-            'query' => Log::find()->where(['id_producto' => null]) ,
-            'sort' => [
-                    'defaultOrder' => [
-                        'fecha' => SORT_DESC
-                    ]
-                ],
-            ]) ;
-
+        $user = new \common\models\User();
+        $searchModel = new \app\models\LogSearch();
+        $dataProvider = $searchModel->searchCharge(\Yii::$app->request->get());
         return $this->render('charge' , [
-                    'dataProvider' => $dataProvider
+                    'dataProvider' => $dataProvider,
+                    'searchModel' => $searchModel,
+                    'user' => $user
                 ]) ;
+        
         
     }
     public function actionReview() {

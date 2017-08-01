@@ -36,6 +36,13 @@ class SignupForm extends Model
         ];
     }
 
+    public function scenarios()
+    {
+        $scenarios = parent::scenarios();
+        $scenarios['recover'] = ['username','email'];//Scenario Values Only Accepted
+        return $scenarios;
+    }
+
     public function attributeLabels()
     {
         return [

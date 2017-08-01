@@ -19,6 +19,12 @@ $this->params['breadcrumbs'][] = ['label' => 'Marcas', 'url' => Url::to(['/produ
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="mapping-upload">
+    <div class="text-left">
+        <h4>
+            <strong>Marca: </strong>
+            <?= $marca ?>
+        </h4>
+    </div>
     <div class="text-center">
         <?php $form = ActiveForm::begin(
                 [
@@ -29,7 +35,8 @@ $this->params['breadcrumbs'][] = $this->title;
             ]);
         ?>
             <div class="form-group">
-                <?= yii\bootstrap\Html::fileInput('archivo'); ?>
+                <?= $form->field($cvsModel, 'file_csv')->fileInput()->label(false)
+                ?>
                 <small class="text-warning">*Válido sólo archivos .csv </small>    
             </div>
 
@@ -102,6 +109,10 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php
         if ($validate) :
     ?>
+    <div class="text-right">
+        <strong>Cantidad de productos totales: </strong>
+        <?= $sum ?>
+    </div>
     <div class="col-lg-6 col-lg-offset-3">
         <?php $form = ActiveForm::begin(
                     [

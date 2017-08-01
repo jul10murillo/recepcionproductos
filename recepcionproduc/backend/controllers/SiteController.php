@@ -6,6 +6,8 @@ use yii\web\Controller;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
 use common\models\LoginForm;
+use common\models\User;
+use yii\data\ActiveDataProvider;
 
 /**
  * Site controller
@@ -26,7 +28,7 @@ class SiteController extends Controller
                         'allow' => true,
                     ],
                     [
-                        'actions' => ['logout', 'index'],
+                        'actions' => ['logout', 'index','view'],
                         'allow' => true,
                         'roles' => ['@'],
                     ],
@@ -60,7 +62,26 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
-        return $this->render('index');
+        return $this->redirect(\yii\helpers\Url::to(['rbac/role']));
+        $dataProvider = new ActiveDataProvider([
+            'query'      => User::find(),
+        ]) ;
+        return $this->render('index',[
+            'dataProvider'=>$dataProvider
+        ]);
+    }
+    /**
+     * Displays homepage.
+     *
+     * @return string
+     */
+    public function actionView($id)
+    {
+        $permissions = Yii::$app->authManager->getPermissions();
+        
+        return $this->render('view',[
+            'id'=>$id
+        ]);
     }
 
     /**

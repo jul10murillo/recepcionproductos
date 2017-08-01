@@ -75,7 +75,7 @@ class Productexist extends \yii\base\Model {
     public function rules() {
         return [
             [['cod_barra','referencia','color','talla'] , 'required'] ,
-            [['cod_barra','cantidad'] , 'integer'] ,
+            [['cantidad'] , 'integer'] ,
             [['referencia', 'talla'] , 'string' , 'max' => 255] ,
             [
                    'cod_barra', 

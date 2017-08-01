@@ -6,15 +6,34 @@ use kartik\grid\GridView ;
 use yii\helpers\Html ;
 use kartik\export\ExportMenu;
 use yii\helpers\Url;
+use kartik\form\ActiveForm ;
+
 
 $this->title = 'Recepción';
 $this->params['breadcrumbs'][] = ['label' => 'Log', 'url' => Url::to(['/log/review'])];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 
-<h2>
-    Log de recepcion
-</h2>
+<div class="col-lg-9">
+    <h2>
+        Log de recepcion
+    </h2>
+</div>
+<div class="col-lg-3">
+    <?php
+    $form = ActiveForm::begin(
+                [
+                    'type' => ActiveForm::TYPE_INLINE,
+                    'method' => 'get',
+                    'formConfig' => ['labelSpan' => 3, 'deviceSize' => ActiveForm::SIZE_SMALL]
+                ]
+        );
+    ?>
+    <?= $form->field($user, 'username') ?>
+    <?= Html::submitButton('Buscar', ['class' => 'btn btn-primary']) ?>
+    <?php ActiveForm::end() ; ?>
+</div>
+
 <?=
 
 ExportMenu::widget([
@@ -46,6 +65,7 @@ ExportMenu::widget([
 
 GridView::widget([
     'dataProvider'  => $dataProvider ,
+    'filterModel' => $searchModel ,
     'columns'       => [
         [
             'class'          => 'kartik\grid\ExpandRowColumn' ,

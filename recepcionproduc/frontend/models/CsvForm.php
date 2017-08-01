@@ -22,7 +22,7 @@ class CsvForm extends Model
         return [
             // name, email, subject and body are required
             [['file_csv'], 'required'],
-            [['file_csv'], 'file', 'skipOnEmpty' => false, 'extensions' => 'xls, csv'],
+            [['file_csv'], 'file', 'skipOnEmpty' => false, 'extensions' => 'csv'],
 
         ];
     }

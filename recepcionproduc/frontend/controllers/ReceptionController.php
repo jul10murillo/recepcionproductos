@@ -57,8 +57,8 @@ class ReceptionController extends \yii\web\Controller {
     public function actionView($id) {
         $mapping = Mapping::find()->where(['id' => $id])->one() ;
         $product = Product::find()->where(['id_mapping' => $id])->andWhere(['not', ['acumulado' => null]])->all() ;
-
-
+        $codSize = isset($product[0]) ? strlen($product[0]['cod_barra']) : 14 ;
+        
         $newProduct  = new Productnew ;
         $newProduct1 = new \app\models\Productexist ;
 
@@ -132,6 +132,7 @@ class ReceptionController extends \yii\web\Controller {
                     'newProduct'    => $newProduct,
                     'newProduct1'   => $newProduct1,
                     'dataProveedor' => $dataProveedor,
+                    'codSize'       => $codSize,
                 ]) ;
     }
 

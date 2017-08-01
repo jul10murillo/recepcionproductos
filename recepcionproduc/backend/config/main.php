@@ -8,11 +8,35 @@ $params = array_merge(
 
 return [
     'id' => 'app-backend',
+    'language' => 'es',
     'basePath' => dirname(__DIR__),
     'controllerNamespace' => 'backend\controllers',
     'bootstrap' => ['log'],
-    'modules' => [],
+    'modules' => [
+        'gridview' => ['class' => 'kartik\grid\Module'],
+        'rbac' => [
+            'class' => 'johnitvn\rbacplus\Module'
+        ]
+    ],
     'components' => [
+        
+        'view' => [
+            'theme' => [
+                'pathMap' => [
+                   '@app/views' => '@vendor/dmstr/yii2-adminlte-asset/example-views/yiisoft/yii2-app'
+                ],
+            ],
+        ],
+        'assetManager' => [
+            'bundles' => [
+                'dmstr\web\AdminLteAsset' => [
+                    'skin' => 'skin-yellow',
+                ],
+            ],
+        ],
+        'authManager' => [
+            'class' => 'yii\rbac\DbManager' ,
+        ] ,
         'request' => [
             'csrfParam' => '_csrf-backend',
         ],

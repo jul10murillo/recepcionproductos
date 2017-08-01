@@ -168,7 +168,7 @@ $script = <<< JS
     });
     
     $('#cod_bar').on('keyup', function(e){
-        if( $(this).val().length >= 14 ){
+        if( $(this).val().length >= $codSize ){
             var cod_barra = $( this ).val();
             $( "#cod_bar" ).val("");
             $.post( "$urlPost", { cod_barra: cod_barra })
